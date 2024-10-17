@@ -52,9 +52,7 @@ The archive contains two files, GM1 and GS1, 28956 and 28961 bytes respectively.
 The game file (FORTNOKS.MID) is smaller (14287 bytes), probably grabbed directly from the game resources.
 It is subject to copyright, so it requires disclaimers:
 
-```
-Grabbag (Duke Nukem Theme) - composed by Lee Jackson. Copyright (©)1995 Lee Jackson.  All rights reserved.
-```
+`Grabbag (Duke Nukem Theme) - composed by Lee Jackson. Copyright (©)1995 Lee Jackson.  All rights reserved.`
 
 ```
 Duke Nukem is (©) 1999-2011 - Gearbox Software, LLC. All rights reserved.
