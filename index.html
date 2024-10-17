@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sokoban</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:,">
+<style>
+html,body {
+  padding: 0; margin: 0;
+  overflow: hidden;
+  user-select: none;
+  background: dimgrey;
+}
+#canvasContainer {
+  position: absolute;
+  z-index: -1;
+}
+#gameCanvas {
+  display: block;
+  image-rendering: pixelated;
+}
+.controls {
+  position: absolute;
+  padding: 16px;
+}
+.btn  {
+  width: 50px;
+  height: 50px;
+}
+
+</style>
+
+<!--script src="js/YASS_loader.js"></script-->
+
+</head>
+<body>
+
+<div id="canvasContainer"><canvas id="gameCanvas" width=320 height=200></canvas></div>
+
+<div class="controls">
+  <button class="btn btnTileset" id="dw" title="tileset 1">1</button>
+  <button class="btn btnTileset" id="lens" title="tileset 2">2</button>
+  <button class="btn btnTileset" id="fn" title="tileset 3">3</button>
+  <button class="btn btnLevel" id="back" title="prevous level">Z</button>
+  <button class="btn btnLevel" id="forward" title="next level">X</button>
+  <button class="btn btnReset" id="reset" title="reset level">R</button>
+  <button class="btn btnSolve" id="solve" title="solve">E</button>
+</div>
+
+</body>
+
+<script>
+let scale = 2.75; // Initial scale
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+
+// Tile size and canvas dimensions
+let TILE_WIDTH = 20;
+let TILE_HEIGHT = 17;
+let COLS = 16;
+let ROWS = 10;
+
+let tileset = 'fn';
+let level = 0;
+
+const T_EMPTY = ' ';
+const T_WALL = '#';
+const T_BOX = '$';
+const T_PLAYER = '@';
+const T_PLACE = '.';
+const T_DONE = '*';
+const T_PLAYER_OVER_PLACE = '+';
+const T_FILLER = '-';
+
+// Map layout using levels
+let levels=[[
+'----#####-------',
+'----#   #-------',
+'--###  $###-----',
+'--#  $    #-----',
+'### # ##  ######',
+'#   # ##$ #  ..#',
+'# $   $   $  ..#',
+'##### ### #  ..#',
+'----#  @  ######',
+'----#######-----'
+],[
+'-#####-######---',
+'-#   #-#    #---',
+'-# $ ### ## ####',
+'-# # #   $  $@ #',
+'-# ###  $  $ # #',
+'## # #####  $  #',
+'#  #  ###  #####',
+'#           ...#',
+'##  #####   ...#',
+'-####---########'
+],[
+'########--------',
+'#.##   ########-',
+'#.## $ $ $    #-',
+'#.## $    # # ##',
+'#.### ## ## #  #',
+'#.###$## ## ## #',
+'#.     # ## $  #',
+'#. $@$    #   ##',
+'#.####    #####-',
+'###--######-----'
+],[
+'################',
+'#........#     #',
+'##  ###### ##  #',
+'-#  # @    ##$ #',
+'-#  #$# #####  #',
+'-#  # $ #   #$ #',
+'-#$    $#$# #  #',
+'-#   #      $  #',
+'-#####  ###   ##',
+'-----####-#####-'
+],[
+'#######--#######',
+'#     ##-#     #',
+'# ###  ### ### #',
+'# #### .. $### #',
+'# #### ## $    #',
+'#    $ ## #### #',
+'# ###$ .. #### #',
+'# ### ###  ### #',
+'#     #-##  @  #',
+'#######--#######'
+],[
+'##############--',
+'#  ##        #--',
+'# $##  ##$## ##-',
+'#  ## $ $ ##  ##',
+'##  ## ##@$  $ #',
+'#  $   ## ###  #',
+'#...   ##  ##  #',
+'#...#  $   ##$ #',
+'#...#  ##  ##  #',
+'################' 
+],[
+'################',
+'#.... #  ##    #',
+'#     #$   $## #',
+'# ##  $ @#     #',
+'# ## ## ## #####',
+'#$#  ## ## #####',
+'# #   $ ##   $ #',
+'# #  ##$$    # #',
+'#....##   ##   #',
+'################' 
+],[
+'-###############',
+'-#   .  .  .   #',
+'-#  ####### #  #',
+'-## $  $  $.#$##',
+'#####.. #   #  #',
+'#   #..#### #$ #',
+'# $  ..#  # #  #',
+'# $$$$ @      ##',
+'#     ###  #  #-',
+'#######-#######-' 
+],[
+'-############---',
+'##   #      ##--',
+'#  $ #  $ $@ #--',
+'#  # # $ $ $ #--',
+'## ##### #####--',
+'#  #  ##  ######',
+'#         #  ..#',
+'##  ####     ..#',
+'-####--####  ..#',
+'----------######' 
+],[
+'################',
+'#   #   ##     #',
+'# #$# $    $ # #',
+'#   # # ###### #',
+'##  @ #  $ $   #',
+'## ####  # ###.#',
+'#     $  # ###.#',
+'#  #####$# ###.#',
+'##         ....#',
+'-###############' 
+],[
+'----------####--',
+'#######---#  ###',
+'#  #  #####    #',
+'# $#. $   # .$@#',
+'#  #.## $ ##.###',
+'# $#.## $ ##.  #',
+'#  $. #   $ .  #',
+'#     ######  ##',
+'###  ##----####-',
+'--####----------' 
+],[
+'###############-',
+'#   #......#  #-',
+'# $ ####  ## $#-',
+'### #  #   #  #-',
+'#     @#   ## ##',
+'# $$$$### ###  #',
+'###            #',
+'--# ## ##  #  ##',
+'--#    ########-',
+'--######--------' 
+],[
+'###############-',
+'#..  #    ##  ##',
+'#..     # $ $  #',
+'#..  # #### #  #',
+'######      # ##',
+'---#@   ##### ##',
+'--###$$ $  ##  #',
+'--#   $ #      #',
+'--#     #  #  ##',
+'--#############-' 
+],[
+'---###-########-',
+'--##.###  #   ##',
+'-##...# $   $  #',
+'##.. ## $ $ $ ##',
+'#..     $ $ $ #-',
+'#..  @  $ $ $ #-',
+'##.. ## $ $ $ ##',
+'-##...# $   $  #',
+'--##.###  #   ##',
+'---###-########-' 
+],[
+'################',
+'#...#   ##     #',
+'#...##$ ## ##$ #',
+'#   ##  $  ##  #',
+'# @ #  ## ###  #',
+'##$##  ## ###$##',
+'#  ##$ ## ###  #',
+'#              #',
+'##   #######  ##',
+'-#####-----####-' 
+],[
+'-########-------',
+'##..##  ##------',
+'#.  .    #------',
+'#.  .$   #######',
+'##..### ###    #',
+'#####   ###$ # #',
+'# $   $    $ # #',
+'# $ $ $####### #',
+'#       @      #',
+'################' 
+],[
+'####-----#######',
+'#  ####### ....#',
+'# $##   ## .##.#',
+'#  ## $   $.##.#',
+'##    $ $$ ....#',
+'## #  $   ##$$ #',
+'#  #####$$##  ##',
+'#   $   @      #',
+'##  #  ###     #',
+'-###############' 
+],[
+'---#############',
+'---#  ##.......#',
+'#### @###$ #####',
+'#   $$## $ #----',
+'# #   ##   #####',
+'# ## $###  #   #',
+'# ##  ### ###$ #',
+'#  $           #',
+'####  ###  #  ##',
+'---####-#######-'
+],[
+'######----######',
+'#    #----#    #',
+'# $  ######  . #',
+'# $ ###  ### . #',
+'# $ ###      . #',
+'# $      ### . #',
+'# $ ###  ### . #',
+'# $  ######  . #',
+'# @  #----#    #',
+'######----######' 
+],[
+'###############-',
+'#             #-',
+'# $ $ $ $ $ $ #-',
+'# # # # # # # ##',
+'#....          #',
+'#....  $  $  $ #',
+'#....   $$ $$  #',
+'#....  $  $  $ #',
+'#....$@$  $  $ #',
+'################' 
+]];
+
+let config = {
+  "tilesets": {
+    "dw": {
+      "tiles": ["anim","font","font2","sprites","sysfont"],
+      "sprites": {
+        "wall": [3,5,3],
+        "box": [0,0,4],
+        "place": [3,4,1],
+        "done": [3,9,1],
+        "player": [0,5,2],
+        "down": [0,8,4],
+        "right": [0,24,8],
+        "left": [0,16,8],
+        "up": [0,12,4],
+        "font": [1,0,96],
+        "font2": [2,0,96],
+        "sysfont": [4,0,96],
+        "panel": [3,19,4]
+      },
+    },
+
+    "lens": {
+      "tiles": ["data","font","ghost"],
+      "sprites": {
+        "wall": [0,29,1],
+        "box": [0,30,1],
+        "place": [0,28,1],
+        "player": [0,0,2, 0,0,1,1],
+
+        "down": [0,1,7, 1,2,3,4,3,2,1,7,6,5,6,7],
+        "right": [0,0,34, 8,12,10,12,8,11,9,11],
+        "left": [0,0,34, 17,13,15,13,17,14,16,14],
+        "up": [0,18,7, 18,19,20,21,20,19,18,24,23,22,23,24],
+
+        "stars": [0,31,3],
+        "ghost1": [2,0,3],
+        "ghost2": [2,3,3],
+        "font": [1,0,43],
+      },
+      "charset": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!.,\"-()"
+    },
+
+    "fn": {
+      "tiles": ["data","data2","data3","data4","font"],
+      "sprites": {
+        "wall": [1,2,1],
+        "box": [1,6,5],
+        "place": [1,0,1],
+        "player": [0,0,2, 0,0,1,1],
+
+        "down": [0,1,7, 1,2,3,4,3,2,1,7,6,5,6,7],
+        "right": [0,0,34, 8,12,10,12,8,11,9,11],
+        "left": [0,0,34, 17,13,15,13,17,14,16,14],
+        "up": [0,18,7, 18,19,20,21,20,19,18,24,23,22,23,24],
+
+        "stars": [0,31,3],
+        "font": [4,0,45],
+      },
+      "charset": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!.,\"-();:"
+    }
+  }
+};
+
+// Preload images for the map tiles
+let images = {};
+let tiles = {};
+
+const zeroPad = (num, places) => String(num).padStart(places, '0');
+
+function preloadImages(callback) {
+  let loadedImages = 0;
+  let numImages = 0;
+
+  let sources = config.tilesets;
+
+  for (let key in sources) {
+    for (let name in sources[key]['sprites']) {
+
+      tiles[key] = tiles[key] || {};
+      tiles[key][name] = {};
+
+      let [gid,start,total] = sources[key]['sprites'][name];
+      let group = sources[key]['tiles'][gid];
+
+      for (let i = start; i<start+total; i++) {
+
+        let file = zeroPad(i,3) + '.png';
+        let path = 'data/'+ key + '/' + group + '/' + file;
+
+        if (images[path]) {
+          tiles[key][name][i] = images[path];
+          continue;
+        }
+
+        numImages++;
+
+        images[path] = new Image();
+
+        tiles[key][name][i] = images[path];
+
+        images[path].onload = function() {
+          if (++loadedImages >= numImages) {
+            callback();
+          }
+        };
+
+        //console.log('loading', path);
+
+        images[path].src = path;
+      }
+    }
+  }
+}
+
+const ALIGN_CENTER = 1;
+const ALIGN_BOTTOM = 2;
+const ALIGN_RIGHT = 4;
+
+function drawTextExt(s, x,y, tileset, name, dryrun=false) {
+  let [gid,start,total] = config.tilesets[tileset]['sprites'][name];
+  let charset = config.tilesets[tileset]['charset'];
+  let width = charset ? 14 : 0;
+  let w = 0;
+  let x0 = x;
+  for (let i=0; i<s.length; i++) {
+    let c = s.charCodeAt(i);
+    let index = 0;
+    if (charset) {
+      let pos = charset.indexOf(s[i]);
+      index = pos;
+    } else {
+      index = c - 32;
+    }
+    let image = tiles[tileset][name][start + index];
+    if (image && !dryrun) {
+      ctx.drawImage(image, x, y);
+    }
+    x += (width || !image) ? width : image.width;
+    w = x-x0;
+  }
+  return w;
+}
+
+function drawText(s, x,y, tileset, name, align) {
+  let w = drawTextExt(s, x, y, tileset, name, true);
+  if (align & ALIGN_CENTER) x = x - ~~(w/2);
+  if (align & ALIGN_RIGHT) x = x - w;
+  drawTextExt(s, x, y, tileset, name, false);
+}
+
+function drawSprite(x, y, tileset, name, index=0, align=0, animated=0) {
+  let data = config.tilesets[tileset]['sprites'][name];
+  if (!data) return;
+
+  let [gid,start,total] = data;
+
+  if (animated) {
+    index = Math.floor(Date.now() / 100) % total;
+    if (data.length>3) {
+
+      let total = data.length-3;
+
+      start = 0;
+
+      let ofs = Math.floor(Date.now() / 100) % total;
+
+      index = data[3 + ofs];
+
+      //console.log(total, ofs, index, data);
+
+      // pingpong
+      //const cycleLength = (total - 1) * 2; // Full trip from 0 to total-1 and back
+      //const frame = ~~(Date.now() / 100) % cycleLength;
+      //index = frame < total ? frame : cycleLength - frame;
+    }
+  }
+
+  if (tileset=='dw' && name=='wall') {
+    index = [0,2,1][level % total];
+  }
+
+  let image = tiles[tileset][name][start + index];
+
+  if (image) {
+    if (align & ALIGN_CENTER) x = x - ~~(image.width/2);
+    if (align & ALIGN_BOTTOM) y = y - image.height;
+    if (align & ALIGN_RIGHT) x = x - image.width;
+    ctx.drawImage(image, x, y);
+  }
+}
+
+  // --- make canvas draggable
+
+  let canvasContainer = document.getElementById('canvasContainer');
+  let isDragging = false;
+  let startX, startY, initialLeft, initialTop;
+
+  function centerCanvas() {
+    canvasContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    canvasContainer.style.left = window.innerWidth/2 + 'px';
+    canvasContainer.style.top = window.innerHeight/2 + 'px';
+  }
+
+  function startDrag(e) {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    initialLeft = canvasContainer.offsetLeft;
+    initialTop = canvasContainer.offsetTop;
+  }
+
+  function drag(e) {
+    if (isDragging) {
+      let dx = e.clientX - startX;
+      let dy = e.clientY - startY;
+      canvasContainer.style.left = initialLeft + dx + 'px';
+      canvasContainer.style.top = initialTop + dy + 'px';
+    }
+  }
+
+  function stopDrag() {
+    isDragging = false;
+  }
+
+  function zoom(e) {
+    scale += e.deltaY * -0.005;
+    scale = Math.min(Math.max(0.125, scale), 64);
+    canvasContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  // Center the canvas initially and when window is resized
+  window.addEventListener('load', centerCanvas);
+  window.addEventListener('resize', centerCanvas);
+
+  canvasContainer.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('wheel', zoom);
+
+//----------------------------------------------------------
+
+let pressed = {};
+
+let bindings = {
+  KeyA:['x',-1],KeyD:['x',+1],
+  KeyW:['y',-1],KeyS:['y',+1],
+  ArrowLeft:['x',-1],ArrowRight:['x',+1],
+  ArrowUp:['y',-1],ArrowDown:['y',+1],
+};
+
+let busy = false;
+let carry = -1;
+
+function Player(){}
+function Cell(type, id) { this.type = type; this.id = id; }
+
+let player = new Player();
+
+Player.prototype.init = function(x,y,data) {
+  this.x = x;
+  this.y = y;
+  this.start = 0;
+  this.dx = 0;
+  this.dy = 0;
+  this.data = data;
+  this.anim = 'player';
+};
+
+Player.prototype.peek = function(x,y) {
+  let [w,h] = [this.data[0].length, this.data.length];
+  if (x>=w || x<0 || y>=h || y<0) return 0;
+  return this.data[y][x];
+};
+
+Player.prototype.poke = function(x,y,c) {
+  let [w,h] = [this.data[0].length, this.data.length];
+  if (x>=w || x<0 || y>=h || y<0) return 0;
+  this.data[y][x] = c;
+};
+
+Player.prototype.copy = function(x,y,c) {
+  let [w,h] = [this.data[0].length, this.data.length];
+  if (x>=w || x<0 || y>=h || y<0) return 0;
+  this.data[y][x] = c;
+};
+
+Player.prototype.update = function(left, top, sw, sh) {
+
+  let v = {};
+  for (key of Object.keys(bindings)) {
+    if (pressed[key]) {
+      let [dir, step] = bindings[key];
+      v[dir] = (v[dir]||0) + step;
+    }
+  }
+
+  (v.x || v.y) && this.move(v.x||0, v.y||0);
+
+  let [dx,dy] = [this.dx, this.dy];
+  let [x,y] = [this.x * sw, this.y * sh]
+  let [x0,y0] = [this.x * sw - (dx*sw), this.y * sh - (dy*sh)]
+
+  let duration = 250;
+  let dt = Date.now() - this.start;
+
+  this.sx = x;
+  this.sy = y;
+
+  if (dt >= duration) {
+    busy = false;
+    carry = -1;
+    this.dx = 0;
+    this.dy = 0;
+
+    // if we did the places, advance forward one level
+
+    let boxes = 0;
+    for (let i = 0; i < this.data.length; i++) {
+      for (let j = 0; j < this.data[0].length; j++) {
+        let c = this.data[i][j].type;
+        if (c==T_BOX) boxes += 1;
+      }
+    }
+
+    if (boxes==0) {
+      loadLevel((level + 1) % levels.length);
+      return;
+    }
+
+  } else {
+    let k = dt / duration;
+    x = x0 + (dx * sw) * k;
+    y = y0 + (dy * sh) * k;
+    this.sx = x;
+    this.sy = y;
+  }
+
+  if (dx==0 && dy==0) this.move(0,0);
+};
+
+Player.prototype.draw = function(left, top, sw, sh) {
+  drawSprite(left + this.sx + ~~(sw/2), top + this.sy + sh, tileset, this.anim, 0, ALIGN_CENTER | ALIGN_BOTTOM, true);
+};
+
+Player.prototype.canMove = function(dx, dy) {
+  let [x,y] = [this.x, this.y];
+  let [x1,y1] = [x+dx, y+dy];
+  let [x2,y2] = [x1+dx, y1+dy];
+  let prim = this.peek(x1,y1).type;
+  let sec = this.peek(x2,y2).type;
+
+  if (prim==T_WALL || ((prim==T_BOX || prim==T_DONE) && (sec!=T_EMPTY && sec!=T_PLACE))) {
+    return false;
+  }
+
+  return true;
+};
+
+Player.prototype.move = function(dx, dy) {
+
+  if (dx==0 && dy==0) { 
+    this.anim = 'player';
+    return false;
+  }
+
+  let [x,y] = [this.x, this.y];
+  let [x1,y1] = [x+dx, y+dy];
+  let [x2,y2] = [x1+dx, y1+dy];
+  let prim = this.peek(x1,y1);
+  let sec = this.peek(x2,y2);
+
+  this.anim = dx != 0 ? (dx<0 ?  'left' : 'right') :  dy != 0 ? (dy<0 ?  'up' : 'down') : this.anim;
+
+  if (busy) return false;
+
+  if (!this.canMove(dx, dy)) return false;
+
+  busy = true;
+
+  this.x += dx;
+  this.y += dy;
+
+  this.dx = dx;
+  this.dy = dy;
+  this.start = Date.now();
+
+  if ((prim.type==T_BOX || prim.type==T_DONE) && (sec.type==T_EMPTY || sec.type==T_PLACE)) {
+    // move box to a new location, preserve cell id
+
+    //this.poke(x1,y1, prim==T_DONE ? T_PLACE : T_EMPTY);
+    //this.poke(x2,y2, sec==T_PLACE ? T_DONE : T_BOX);
+
+    let id = prim.id;
+
+    this.poke(x1,y1, new Cell(prim.type==T_DONE ? T_PLACE : T_EMPTY));
+    this.poke(x2,y2, new Cell(sec.type==T_PLACE ? T_DONE : T_BOX, id));
+
+    carry = id;
+  }
+
+  return true;
+};
+
+function loadLevel(i) {
+  level = i;
+  stop();
+  let src = levels[level];
+  let data = [];
+  let [x,y] = [0,0];
+  let id = 0;
+  for (let i=0; i<src.length; i++) {
+    for (let j=0; j<src[i].length; j++) {
+      let c = src[i][j];
+      data[i] = data[i]||[];
+      if (c==T_PLAYER) {
+        [x,y] = [j,i];
+        data[i][j] = new Cell(T_EMPTY);
+      } else {
+        data[i][j] = new Cell(c);
+        if (c==T_BOX) {
+          data[i][j].id = id;
+          id += 1;
+        }
+      }
+    }
+  }
+  player.init(x, y, data);
+  player.blocks = id-1;
+}
+
+// Draw the map using preloaded images
+function drawLevel(data) {
+  let gw = 16;
+  let gh = 10;
+
+  let sw = 20;
+  let sh = 17;
+
+  if (tileset=='dw') {
+    sw = 16;
+    sh = 16;
+  }
+
+  let dx = (canvas.width - sw * gw) / 2;
+  let dy = 0;//(canvas.height - sh * gh) / 2;
+
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  let nameMapping = {
+    [T_WALL]: 'wall',
+    [T_BOX]: 'box',
+    [T_PLACE]: 'place',
+    [T_DONE]: 'done',
+    [T_PLAYER]: 'player',
+  };
+
+  player.update(dx, dy, sw, sh);
+
+  // need to render twice for two layers (static / dynamic)
+
+  for (let i = 0; i < gh; i++) {
+    for (let j = 0; j < gw; j++) {
+      let c = data[i][j].type;
+      if (![T_FILLER, T_WALL, T_PLACE, T_DONE].includes(c)) continue;
+      if (tileset=='dw' && c==T_FILLER) c = T_WALL;
+      let name = nameMapping[c];
+      if (!name) continue;
+      let x = dx + j*sw;
+      let y = dy + i*sh;
+      let index = 0;
+
+      if (c==T_DONE) {
+        drawSprite(x, y, tileset, 'place', index);
+      } else {
+        drawSprite(x, y, tileset, c==T_DONE ? 'box': name, index, 0, tileset=='dw' && name=='box');
+      }
+    }
+  }
+
+  for (let i = 0; i < gh; i++) {
+    for (let j = 0; j < gw; j++) {
+      let c = data[i][j].type;
+      if (![T_DONE,T_BOX].includes(c)) continue;
+      let name = nameMapping[c];
+      if (!name) continue;
+      let x = dx + j*sw;
+      let y = dy + i*sh;
+      let index = 0;
+      if ((c==T_BOX || c==T_DONE) && tileset=='fn') { index = (data[i][j].id+1) % 5; }
+
+      // if we carry a box, adjust its coordinates to the player
+      if (carry == data[i][j].id) {
+        x = dx + player.sx + player.dx * sw;
+        y = dy + player.sy + player.dy * sh;
+      }
+
+      drawSprite(x, y, tileset, c==T_DONE && tileset !='dw' ? 'box': name, index, 0, tileset=='dw' && name=='box');
+    }
+  }
+
+  if (tileset=='dw') {
+    drawSprite(dx, dy + gh*sh, tileset, 'panel', 0);
+    drawSprite(dx + gw*sw/2, dy + gh*sh, tileset, 'panel', 1, ALIGN_CENTER);
+    drawSprite(dx + gw*sw/2, dy + gh*sh + sh*2, tileset, 'panel', 2, ALIGN_CENTER | ALIGN_BOTTOM);
+    drawSprite(dx + gw*sw, dy + gh*sh, tileset, 'panel', 3, ALIGN_RIGHT);
+
+    drawText('03', dx + 8*6, dy + sh*gh + 8*2, tileset, 'sysfont');
+    drawText(zeroPad(player.blocks+1,2), dx + 8*24, dy + sh*gh + 8*2, tileset, 'sysfont');
+
+  }
+
+  if (tileset!='fn') {
+    drawText('LEVEL '+zeroPad(level+1,2), dx + gw*sw/2, dy + gh*sh + ~~(sh/2), tileset, 'font', ALIGN_CENTER);
+  } else {
+    drawText(zeroPad(level+1,2), dx + gw*sw - sw/4, dy + gh*sh + ~~(sh/2), tileset, 'font', ALIGN_RIGHT);
+  }
+
+  player.draw(dx, dy, sw, sh);
+}
+
+let frames = 0;
+let startTime = 0;
+
+function update(timestep) {
+
+  let time = Date.now();
+  let dt = time - startTime;
+  if (dt >= 1000 ) {
+    //console.log('fps', frames);
+    frames = 0;
+    startTime = time;
+  }
+
+  frames += 1;
+
+  drawLevel(player.data);
+  window.requestAnimationFrame(update);
+}
+
+let solution = [];
+
+function play() {
+  if (solution.length==0) {
+    stop();
+    player.move(0,0);
+    return;
+  }
+
+  let d = solution[0];
+  let res = false
+
+  switch(d) {
+    case 'l': res = player.move(-1,0); break;
+    case 'r': res = player.move(1,0); break;
+    case 'u': res = player.move(0,-1); break;
+    case 'd': res = player.move(0,1); break;
+  }
+
+  if (res) {
+    solution.shift();
+  }
+
+  setTimeout(play, 20);
+}
+
+function stop() {
+  solution = [];
+  document.querySelector('#solve').disabled = false;
+}
+
+const worker = new Worker('js/worker.js');
+
+worker.onmessage = (event) => {
+  //console.log("WASM result:", event.data);
+  let output = event.data.join('\n');
+  if (!output.includes('not solved')) {
+    let res = output.split('\n\n').pop().replaceAll('\n','');
+    console.log('solution:', res);
+    solution = [...res.toLowerCase()];
+    play();
+  } else {
+    console.log('NO SOLUTION');
+    stop();
+  }
+};
+
+function solve() {
+  let btn = document.querySelector('#solve');
+  if (btn.disabled || solution.length!=0) return;
+  btn.disabled = true;
+
+  let args = [];
+  for (let i=0; i<player.data.length; i++) {
+    let s = '';
+    for (let j=0; j<player.data[i].length; j++) {
+      let c = player.data[i][j].type;
+      if (c==T_FILLER) c = T_WALL;
+      s += (player.x==j && player.y==i) ? (c==T_PLACE ? T_PLAYER_OVER_PLACE : T_PLAYER) : c;
+    }
+    args.push(s);
+  }
+
+  worker.postMessage({ args: ['YASS', '-inline', ...args] });
+}
+
+function reset() { loadLevel(level); }
+function nextLevel() {level<levels.length-1 && loadLevel(level+1);}
+function prevLevel() {level>0 && loadLevel(level-1);}
+
+window.onload = function(event) {
+
+  document.addEventListener('keyup', (e) => {
+    delete pressed[e.code];
+  });
+
+  document.addEventListener('keydown', (e) => {
+    pressed[e.code] = true;
+    switch (e.code) {
+      case 'Digit1': tileset='dw'; break;
+      case 'Digit2': tileset='lens'; break;
+      case 'Digit3': tileset='fn'; break;
+      case 'KeyZ': prevLevel(); break;
+      case 'KeyX': nextLevel(); break;
+      case 'KeyR': reset(); break;
+      case 'KeyE': solve(); break;
+      case 'Escape': stop(); break;
+    }
+  });
+
+  preloadImages(function() {
+    loadLevel(level);
+    window.requestAnimationFrame(update);
+  });
+
+  document.querySelectorAll('.btnTileset').forEach(c=> { c. onclick = e=> { tileset=e.target.id; } });
+  document.querySelectorAll('.btnLevel').forEach(c=> { c. onclick = e=> { e.target.id=='back' ? prevLevel() : nextLevel() } });
+  document.querySelectorAll('.btnSolve').forEach(c=> { c. onclick = e=> { solve(); } });
+  document.querySelectorAll('.btnReset').forEach(c=> { c. onclick = e=> { reset(); } });
+}
+
+</script>
+</html>
