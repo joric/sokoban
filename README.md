@@ -2,6 +2,8 @@
 
 Sokoban Anniversary Edition. Includes Dizzy Warehouse (1996), Lens (1998) and Fortnoks (1999).
 
+Live demo: https://joric.github.io/sokoban
+
 ## Trivia
 
 * The original Dizzy Warehouse and Lens games have unsolvable level 16.
