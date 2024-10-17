@@ -611,6 +611,9 @@ Player.prototype.update = function(left, top, sw, sh) {
     this.dx = 0;
     this.dy = 0;
 
+    this.anim = this.nextanim;
+
+
     // if we did the places, advance forward one level
 
     let boxes = 0;
@@ -657,8 +660,7 @@ Player.prototype.canMove = function(dx, dy) {
 
 Player.prototype.move = function(dx, dy) {
 
-  if (dx==0 && dy==0) { 
-    this.anim = 'player';
+  if (dx==0 && dy==0) {
     return false;
   }
 
@@ -669,6 +671,8 @@ Player.prototype.move = function(dx, dy) {
   let sec = this.peek(x2,y2);
 
   this.anim = dx != 0 ? (dx<0 ?  'left' : 'right') :  dy != 0 ? (dy<0 ?  'up' : 'down') : this.anim;
+
+  this.nextanim = this.anim;
 
   if (busy) return false;
 
@@ -911,6 +915,7 @@ window.onload = function(event) {
 
   document.addEventListener('keyup', (e) => {
     delete pressed[e.code];
+    player.nextanim = 'player';
   });
 
   document.addEventListener('keydown', (e) => {
