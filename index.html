@@ -562,7 +562,7 @@ Player.prototype.init = function(x,y,data) {
   this.dx = 0;
   this.dy = 0;
   this.data = data;
-  this.anim = 'player';
+  this.anim = this.nextanim = 'player';
 };
 
 Player.prototype.peek = function(x,y) {
