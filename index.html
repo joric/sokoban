@@ -872,22 +872,6 @@ function stop() {
   document.querySelector('#solve').disabled = false;
 }
 
-const worker = new Worker('js/worker.js');
-
-worker.onmessage = (event) => {
-  //console.log("WASM result:", event.data);
-  let output = event.data.join('\n');
-  if (!output.includes('not solved')) {
-    let res = output.split('\n\n').pop().replaceAll('\n','');
-    console.log('solution:', res);
-    solution = [...res.toLowerCase()];
-    play();
-  } else {
-    console.log('NO SOLUTION');
-    stop();
-  }
-};
-
 function solve() {
   let btn = document.querySelector('#solve');
   if (btn.disabled || solution.length!=0) return;
@@ -903,6 +887,22 @@ function solve() {
     }
     args.push(s);
   }
+
+  const worker = new Worker('js/worker.js');
+
+  worker.onmessage = (event) => {
+    //console.log("WASM result:", event.data);
+    let output = event.data.join('\n');
+    if (!output.includes('not solved')) {
+      let res = output.split('\n\n').pop().replaceAll('\n','');
+      console.log('solution:', res);
+      solution = [...res.toLowerCase()];
+      play();
+    } else {
+      console.log('NO SOLUTION');
+      stop();
+    }
+  };
 
   worker.postMessage({ args: ['YASS', '-inline', ...args] });
 }
