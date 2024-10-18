@@ -3,31 +3,84 @@
 <head>
 <meta charset="utf-8">
 <title>Sokoban</title>
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="icon" href="data:,">
 <style>
-html,body {
-  padding: 0; margin: 0;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  user-select: none;
-  background: dimgrey;
+  background-color: #000;
 }
-#canvasContainer {
+
+#responsiveImage {
   position: absolute;
-  z-index: -1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
 }
-#gameCanvas {
+
+canvas {
   display: block;
-  image-rendering: pixelated;
+  image-rendering: pixelated; /* Ensures pixel-perfect scaling for games */
+  width: 100%;
+  height: 100%;
 }
+
 .controls {
   position: absolute;
   padding: 16px;
+  display: flex;
 }
+
+.bottom-right {
+  bottom: 0;
+  right: 0;
+}
+
+.bottom-left {
+  left: 0;
+  bottom: 0;
+}
+
+
 .btn  {
-  width: 50px;
-  height: 50px;
+  width: 60px;              /* Button size */
+  height: 60px;             /* Same as width for a circle */
+  border-radius: 50%;       /* Round shape */
+
+  background-color: rgba(128, 128, 128, 0.5); /* 50% translucent blue */
+
+  border: none;             /* No border */
+  color: white;             /* Text color */
+  font-size: 18px;          /* Adjust font size */
+  display: flex;            /* Center the text */
+  align-items: center;      /* Vertical alignment */
+  justify-content: center;  /* Horizontal alignment */
+  text-align: center;       /* Ensure multi-line text centers */
+  cursor: pointer;          /* Pointer cursor */
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  user-select: none;        /* Prevent text selection */
+  touch-action: manipulation; /* Optimize touch on mobile */
+  overflow: hidden;         /* Prevent overflow issues */
+
+  outline: none;            /* Remove focus outline */
+  box-shadow: none;        /* Remove any box-shadow applied on focus */
+
+  appearance: none;
+  border: 0;
 }
 
 </style>
@@ -37,17 +90,30 @@ html,body {
 </head>
 <body>
 
-<div id="canvasContainer"><canvas id="gameCanvas" width=320 height=200></canvas></div>
+<div id="responsiveImage">
+  <canvas id="gameCanvas" width=320 height=200></canvas>
+</div>
 
 <div class="controls">
   <button class="btn btnTileset" id="dw" title="tileset 1">1</button>
   <button class="btn btnTileset" id="lens" title="tileset 2">2</button>
   <button class="btn btnTileset" id="fn" title="tileset 3">3</button>
-  <button class="btn btnLevel" id="back" title="prevous level">Z</button>
-  <button class="btn btnLevel" id="forward" title="next level">X</button>
   <button class="btn btnReset" id="reset" title="reset level">R</button>
   <button class="btn btnSolve" id="solve" title="solve">E</button>
 </div>
+
+<div class="controls bottom-left">
+  <button class="btn btnLevel" id="back" title="prevous level">Z</button>
+  <button class="btn btnLevel" id="forward" title="next level">X</button>
+</div>
+
+<div class="controls bottom-right">
+  <button class="btn btnMove" id="left">&larr;</button>
+  <button class="btn btnMove" id="up">&uarr;</button>
+  <button class="btn btnMove" id="down">&darr;</button>
+  <button class="btn btnMove" id="right">&rarr;</button>
+</div>
+
 
 </body>
 
@@ -488,55 +554,6 @@ function drawSprite(x, y, tileset, name, index=0, align=0, animated=0) {
     ctx.drawImage(image, x, y);
   }
 }
-
-  // --- make canvas draggable
-
-  let canvasContainer = document.getElementById('canvasContainer');
-  let isDragging = false;
-  let startX, startY, initialLeft, initialTop;
-
-  function centerCanvas() {
-    canvasContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    canvasContainer.style.left = window.innerWidth/2 + 'px';
-    canvasContainer.style.top = window.innerHeight/2 + 'px';
-  }
-
-  function startDrag(e) {
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    initialLeft = canvasContainer.offsetLeft;
-    initialTop = canvasContainer.offsetTop;
-  }
-
-  function drag(e) {
-    if (isDragging) {
-      let dx = e.clientX - startX;
-      let dy = e.clientY - startY;
-      canvasContainer.style.left = initialLeft + dx + 'px';
-      canvasContainer.style.top = initialTop + dy + 'px';
-    }
-  }
-
-  function stopDrag() {
-    isDragging = false;
-  }
-
-  function zoom(e) {
-    scale += e.deltaY * -0.005;
-    scale = Math.min(Math.max(0.125, scale), 64);
-    canvasContainer.style.transform = `translate(-50%, -50%) scale(${scale})`;
-  }
-
-  // Center the canvas initially and when window is resized
-  window.addEventListener('load', centerCanvas);
-  window.addEventListener('resize', centerCanvas);
-
-  canvasContainer.addEventListener('mousedown', startDrag);
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', stopDrag);
-  document.addEventListener('wheel', zoom);
-
 //----------------------------------------------------------
 
 let pressed = {};
@@ -563,7 +580,7 @@ Player.prototype.init = function(x,y,data) {
   this.dx = 0;
   this.dy = 0;
   this.data = data;
-  this.anim = this.nextanim = 'player';
+  this.anim = 'player';
 };
 
 Player.prototype.peek = function(x,y) {
@@ -611,7 +628,6 @@ Player.prototype.update = function(left, top, sw, sh) {
     carry = -1;
     this.dx = 0;
     this.dy = 0;
-    this.anim = this.nextanim;
 
     // if we did the places, advance forward one level
     let boxes = 0;
@@ -657,14 +673,20 @@ Player.prototype.canMove = function(dx, dy) {
   if (prim==T_WALL || ((prim==T_BOX || prim==T_DONE) && (sec!=T_EMPTY && sec!=T_PLACE))) {
     return false;
   }
-
   return true;
 };
+
+faceTime = null;
 
 Player.prototype.move = function(dx, dy) {
 
   if (dx==0 && dy==0) {
     return false;
+  }
+
+  // can't move diagonally
+  if (dx!=0 && dy!=0) {
+    dy = 0;
   }
 
   let [x,y] = [this.x, this.y];
@@ -675,7 +697,8 @@ Player.prototype.move = function(dx, dy) {
 
   this.anim = dx != 0 ? (dx<0 ?  'left' : 'right') :  dy != 0 ? (dy<0 ?  'up' : 'down') : this.anim;
 
-  this.nextanim = this.anim;
+  clearTimeout(faceTime);
+  faceTime = setTimeout(function() { player.anim = 'player'; }, 150);
 
   if (busy) return false;
 
@@ -700,7 +723,7 @@ Player.prototype.move = function(dx, dy) {
 
     if (sec.type==T_PLACE && prim.type!=T_DONE) {
       this.sound = audio['done'];
-    } else if (prim.type!=T_DONE && (ter.type==T_WALL || ter.type==T_BOX || ter.type==T_DONE)) {
+    } else if (ter.type==T_WALL || ter.type==T_BOX || ter.type==T_DONE) {
       this.sound = audio['box'];
     }
 
@@ -923,10 +946,8 @@ function nextLevel() {level<levels.length-1 && loadLevel(level+1);}
 function prevLevel() {level>0 && loadLevel(level-1);}
 
 window.onload = function(event) {
-
   document.addEventListener('keyup', (e) => {
     delete pressed[e.code];
-    player.nextanim = 'player';
   });
 
   document.addEventListener('keydown', (e) => {
@@ -951,11 +972,64 @@ window.onload = function(event) {
     window.requestAnimationFrame(update);
   });
 
-  document.querySelectorAll('.btnTileset').forEach(c=> { c. onclick = e=> { tileset=e.target.id; } });
-  document.querySelectorAll('.btnLevel').forEach(c=> { c. onclick = e=> { e.target.id=='back' ? prevLevel() : nextLevel() } });
-  document.querySelectorAll('.btnSolve').forEach(c=> { c. onclick = e=> { solve(); } });
-  document.querySelectorAll('.btnReset').forEach(c=> { c. onclick = e=> { reset(); } });
+
+  function onLeft() { pressed['ArrowLeft'] = true; }
+  function onRight() { pressed['ArrowRight'] = true; }
+  function onUp() { pressed['ArrowUp'] = true; }
+  function onDown() { pressed['ArrowDown'] = true; }
+  function onRelease() { pressed = {}; }
+
+
+  document.querySelectorAll('.btnTileset').forEach(c=> { c.onclick = e=> { e.preventDefault(); tileset=e.target.id; } });
+  document.querySelectorAll('.btnLevel').forEach(c=> { c.onclick = e=> { e.preventDefault(); e.target.id=='back' ? prevLevel() : nextLevel() } });
+  document.querySelectorAll('.btnSolve').forEach(c=> { c.onclick = e=> { e.preventDefault(); solve(); } });
+  document.querySelectorAll('.btnReset').forEach(c=> { c.onclick = e=> { e.preventDefault(); reset(); } });
+
+  document.querySelectorAll('.btnMove').forEach(c=> {
+
+    let t = {'left': onLeft, 'right': onRight, 'up':onUp, 'down':onDown};
+
+    c.onmousedown = e=> { e.preventDefault(); t[e.target.id](); };
+
+    c.ontouchstart = e=> { e.preventDefault(); t[e.target.id](); };
+
+    c.onmouseup = onRelease;
+    c.onmouseout = onRelease;
+    c.ontouchend = onRelease;
+
+
+  });
+
+
 }
+
+function fitCanvas() {
+  const container = document.getElementById("responsiveImage");
+  const canvas = document.getElementById("gameCanvas");
+
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+
+  const canvasWidth = canvas.width;
+  const canvasHeight = canvas.height;
+
+  // Calculate the best scaling factor to fit the canvas inside the viewport
+  const widthRatio = windowWidth / canvasWidth;
+  const heightRatio = windowHeight / canvasHeight;
+  const scale = Math.min(widthRatio, heightRatio);
+
+  // Apply the new size to the container
+  const newWidth = canvasWidth * scale;
+  const newHeight = canvasHeight * scale;
+
+  container.style.width = `${newWidth}px`;
+  container.style.height = `${newHeight}px`;
+}
+
+// Ensure the canvas fits when the page loads and on resize
+window.addEventListener('load', fitCanvas);
+window.addEventListener('resize', fitCanvas);
+window.addEventListener('orientationchange', fitCanvas); // For mobile device orientation changes
 
 </script>
 
