@@ -64,6 +64,7 @@ let ROWS = 10;
 
 let tileset = 'fn';
 let level = 0;
+let audio = {};
 
 const T_EMPTY = ' ';
 const T_WALL = '#';
@@ -610,12 +611,9 @@ Player.prototype.update = function(left, top, sw, sh) {
     carry = -1;
     this.dx = 0;
     this.dy = 0;
-
     this.anim = this.nextanim;
 
-
     // if we did the places, advance forward one level
-
     let boxes = 0;
     for (let i = 0; i < this.data.length; i++) {
       for (let j = 0; j < this.data[0].length; j++) {
@@ -627,6 +625,11 @@ Player.prototype.update = function(left, top, sw, sh) {
     if (boxes==0) {
       loadLevel((level + 1) % levels.length);
       return;
+    }
+
+    if (this.sound) {
+      this.sound.play();
+      this.sound = null;
     }
 
   } else {
@@ -687,17 +690,24 @@ Player.prototype.move = function(dx, dy) {
   this.dy = dy;
   this.start = Date.now();
 
+  this.sound = null;
+
   if ((prim.type==T_BOX || prim.type==T_DONE) && (sec.type==T_EMPTY || sec.type==T_PLACE)) {
+
+    // schedule sounds
+    let [x3,y3] = [x2+dx, y2+dy];
+    let ter = this.peek(x3,y3);
+
+    if (sec.type==T_PLACE) {
+      this.sound = audio['done'];
+    } else if (ter.type==T_WALL || ter.type==T_BOX || ter.type==T_DONE) {
+      this.sound = audio['box'];
+    }
+
     // move box to a new location, preserve cell id
-
-    //this.poke(x1,y1, prim==T_DONE ? T_PLACE : T_EMPTY);
-    //this.poke(x2,y2, sec==T_PLACE ? T_DONE : T_BOX);
-
     let id = prim.id;
-
     this.poke(x1,y1, new Cell(prim.type==T_DONE ? T_PLACE : T_EMPTY));
     this.poke(x2,y2, new Cell(sec.type==T_PLACE ? T_DONE : T_BOX, id));
-
     carry = id;
   }
 
@@ -932,6 +942,9 @@ window.onload = function(event) {
       case 'Escape': stop(); break;
     }
   });
+
+  audio['box'] = new Audio('data/fn/sounds/20.tumtum.wav');
+  audio['done'] = new Audio('data/fn/sounds/18.Brlrlrlm.wav');
 
   preloadImages(function() {
     loadLevel(level);
