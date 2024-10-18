@@ -875,7 +875,6 @@ function stop() {
 function solve() {
   let btn = document.querySelector('#solve');
   if (btn.disabled || solution.length!=0) return;
-  btn.disabled = true;
 
   let args = [];
   for (let i=0; i<player.data.length; i++) {
@@ -889,6 +888,8 @@ function solve() {
   }
 
   const worker = new Worker('js/worker.js');
+
+  btn.disabled = true;
 
   worker.onmessage = (event) => {
     //console.log("WASM result:", event.data);
