@@ -93,7 +93,7 @@ After converting FORTNOKS.GDM to .s3m you can open it in OpenMPT and save sample
 
 ## Maps
 
-All 16x10 maps in these games are original (mostly because of the screen size limitation at the time).
+All 20 16x10 maps in these games are original (probably mostly because of the screen size limitation at the time).
 
 * There are original "pusher" maps on GitHub: https://github.com/begoon/sokoban-maps
 
