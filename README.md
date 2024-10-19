@@ -73,15 +73,15 @@ Fortnoks uses [BSWB (Bells, Whistles and Sound Boards)](https://www.phatcode.net
 GDM module format is BSWB proprietary and cannot be converted back.
 It also includes sound samples, namely (enum value is sample number minus 1 in hex):
 
-sample | ids | hex
----|---|---
-17.Yeah.wav | end_level | 0x10
-18.Brlrlrlm.wav | place_gem | 0x11
-19.hahaha.wav | fail_level | 0x12
-20.tumtum.wav | move_gem | 0x13
-21.Builthit.wav | select_item | 0x14
-22.Gbelev02.wav | move_in_menu, activate_menu | 0x15
-23.Item15.wav | deactivate_menu | 0x16
+id | file | name | hex
+---|---|---|---
+17 | Yeah.wav | end_level | 0x10
+18 | Brlrlrlm.wav | place_gem | 0x11
+19 | hahaha.wav | fail_level | 0x12
+20 | tumtum.wav | move_gem | 0x13
+21 | Builthit.wav | select_item | 0x14
+22 | Gbelev02.wav | move_in_menu, activate_menu | 0x15
+23 | Item15.wav | deactivate_menu | 0x16
 
 Samples use the original GDM (General Digital Music) format which is similar to S3M modules.
 The easiest way to extract samples from it is to use existing converters/players, e.g. MegaZeux.
