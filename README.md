@@ -13,23 +13,21 @@ Sokoban Anniversary Edition. Includes Dizzy Warehouse (1996), Lens (1998) and Fo
 * Sources are somewhat incomplete, most resource data files are pre-baked.
 * Dizzy Warehouse was popularized by the Thomas Pynchon's book "Bleeding Edge" (2003).
 
-## Resources
+## Games
 
-### Graphics
-
-PC graphics was packed using `splink.exe` that links Autodesk Animator sprites (.cel) together.
-It doesn't have sources, but the format is simple.
-It's just width, height, data size (2 bytes each, so 6 bytes) and bitmap data, one byte per pixel.
-Palette data is stored independently.
-
-#### Dizzy Warehouse
+### Dizzy Warehouse
 
 * Walls, gems, game panel, 16x16 font use original graphics.
 * Dizzy animation is original but inspired by "Fast Food" (Codemasters, 1989).
 * Most of the logo graphics is from "Dizzy III - Fantazy World" (Codemasters, 1989).
 * Bang animation is from "West Bank" (Gremlin Graphics, 1985)
 
-#### Lens
+### Lens
+
+PC graphics was packed using `splink.exe` that links Autodesk Animator sprites (.cel) together.
+It doesn't have sources, but the format is simple.
+It's just width, height, data size (2 bytes each, so 6 bytes) and bitmap data, one byte per pixel.
+Palette data is stored independently.
 
 Lens uses various sources, sometimes with an altered (rotated) palette.
 
@@ -38,19 +36,12 @@ Lens uses various sources, sometimes with an altered (rotated) palette.
 * Ghost - from "Magicland Dizzy" (PC, The Haunted Swamp, https://yolkfolk.com/games/magicland-dizzy/)
 * Font - from "Magicland Dizzy" (PC, https://youtu.be/aJp4OrPsJmI?t=1472)
 
-#### Fortnoks
+### Fortnoks
 
 * Walls - original hand-painted
 * Gems - gem sprites from Xixit (1995) by Optik Software, Inc.
 
-Xixit credits:
-
-* Art: John Hood (oman)
-* Design: John Hood (oman)
-* Programming: Thomas Pytel (Tran)
-* Music: Andrew G. Sega (Necros), Kenny Chow (C.C.Catch), Andrew Wise (Nemesis), Jon Dal Kristbjornsson (Mesonyx)
-
-### Music
+#### Music
 
 The Fortnoks music is from Duke Nukem 3D, called "Grab Bag" by Lee Jackson (download [here](https://leejacksonaudio.lbjackson.com/GrabbagOriginalVersionMIDI1.1.zip)).
 The archive contains two files, GM1 and GS1, 28956 and 28961 bytes respectively.
@@ -75,7 +66,7 @@ I am not sure why it used Xixit sprites but not the music. It is available in s3
 
 Youtube: https://youtu.be/zQZCZ0GGZds (they are not used here).
 
-### Sound Effects
+#### Sound Effects
 
 Fortnoks uses [BSWB (Bells, Whistles and Sound Boards)](https://www.phatcode.net/downloads.php?id=170) library for sounds.
 GDM module format is BSWB proprietary and cannot be converted back.
@@ -102,17 +93,19 @@ After converting FORTNOKS.GDM to .s3m you can open it in OpenMPT and save sample
 
 ## Maps
 
-Besides the dw maps it could be fun to unclude original "pusher" maps. They can be found on GitHub:
+All 16x10 maps in these games are original (mostly because of the screen size limitation at the time).
 
-* https://github.com/begoon/sokoban-maps
+* There are original "pusher" maps on GitHub: https://github.com/begoon/sokoban-maps
 
 ## Solvers
 
-* https://sokoban.dk/wp-content/uploads/2016/02/Timo-Virkkala-Solving-Sokoban-Masters-Thesis.pdf
-
 The main breakththrough is using ID (Iterative Deepening) A-star instead of a simple A-star.
 
+* https://sokoban.dk/wp-content/uploads/2016/02/Timo-Virkkala-Solving-Sokoban-Masters-Thesis.pdf
+
 ### YASS
+
+See [YASS solver](./tools/YASS/) directory for details (it is used in this game as a WASM binary).
 
 YASS (Yet Another Sokoban Solver) is a GUI Sokoban with many features.
 Works with YASC (Yet Another Socoban Clone). It is truly great and solves 16x10 maps instantly.
@@ -123,8 +116,6 @@ Output notation uses just 8 characters.
 
 * the characters "lurd" (lowercase) indicate the movement of the player to the left, up, right, down.
 * the symbols "LURD" (in uppercase) indicate that the player pushes the box left, up, right, down.
-
-See WASM solver's [README.md](./tools/YASS/README.md) for details.
 
 ### Festival
 
