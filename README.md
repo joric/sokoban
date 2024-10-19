@@ -25,9 +25,9 @@ Palette data is stored independently.
 #### Dizzy Warehouse
 
 * Walls, gems, game panel, 16x16 font use original graphics.
-* Dizzy animation is original but inspired by Fast Food (Codemasters, 1989).
-* Most of the logo graphics is from Dizzy III - Fantazy World (Codemasters, 1989).
-* Bang animation is from Shoot-Out (ZX Spectrum, Martech games, 1989).
+* Dizzy animation is original but inspired by "Fast Food" (Codemasters, 1989).
+* Most of the logo graphics is from "Dizzy III - Fantazy World" (Codemasters, 1989).
+* Bang animation is from "West Bank" (Gremlin Graphics, 1985)
 
 #### Lens
 
@@ -35,8 +35,8 @@ Lens uses various sources, sometimes with an altered (rotated) palette.
 
 * Walls - orignal hand-painted grey as a stone wall (there are several sprites), then color-remapped.
 * Gems - probably original (might be from an obscure DOS vectorballs intro or a DOS game).
-* Ghost - from PC Magicland Dizzy (The Haunted Swamp, https://yolkfolk.com/games/magicland-dizzy/)
-* Font - from PC Magicland Dizzy (https://youtu.be/aJp4OrPsJmI?t=1472)
+* Ghost - from "Magicland Dizzy" (PC, The Haunted Swamp, https://yolkfolk.com/games/magicland-dizzy/)
+* Font - from "Magicland Dizzy" (PC, https://youtu.be/aJp4OrPsJmI?t=1472)
 
 #### Fortnoks
 
