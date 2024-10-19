@@ -50,6 +50,11 @@ canvas {
   right: 0;
 }
 
+.bottom-right-up {
+  bottom: 50px;
+  right: 50px;
+}
+
 .bottom-left {
   left: 0;
   bottom: 0;
@@ -109,9 +114,12 @@ canvas {
 
 <div class="controls bottom-right">
   <button class="btn btnMove" id="left">&larr;</button>
-  <button class="btn btnMove" id="up">&uarr;</button>
   <button class="btn btnMove" id="down">&darr;</button>
   <button class="btn btnMove" id="right">&rarr;</button>
+</div>
+
+<div class="controls bottom-right-up">
+  <button class="btn btnMove" id="up">&uarr;</button>
 </div>
 
 
@@ -850,7 +858,7 @@ function drawLevel(data) {
 
   // draw level text
   let text = (tileset!='fn' ? 'LEVEL ' : '') +zeroPad(level+1,2)
-  let gap = tileset=='dw' ? ~~(sh/2) : 1;
+  let gap = tileset=='dw' ? ~~(sh/2)-1 : 1;
 
   if (tileset == 'fn') {
     drawText(text, dx + gw*sw, dy + gh*sh + gap, tileset, 'font', ALIGN_RIGHT);
