@@ -627,6 +627,7 @@ Player.prototype.update = function(left, top, sw, sh) {
     if (pressed[key]) {
       let [dir, step] = bindings[key];
       v[dir] = (v[dir]||0) + step;
+      stop();
     }
   }
 
