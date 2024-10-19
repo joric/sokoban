@@ -24,7 +24,7 @@ Palette data is stored independently.
 
 #### Dizzy Warehouse
 
-Dizzy warehouse uses Dizzy Fast Food animation, other sprites are original.
+Dizzy Warehouse sprites and levels are original, Dizzy animation inspired by Fast Food (ZX Spectrum).
 
 #### Lens
 
