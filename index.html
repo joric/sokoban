@@ -760,6 +760,7 @@ Player.prototype.move = function(dx, dy) {
 function loadLevel(i) {
   level = i;
   stop();
+  stars = [];
   let src = levels[level];
   let data = [];
   let [x,y] = [0,0];
