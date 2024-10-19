@@ -25,8 +25,9 @@ Palette data is stored independently.
 #### Dizzy Warehouse
 
 * Walls, gems, game panel, 16x16 font use original graphics.
-* Dizzy animation is original but inspired by Fast Food (ZX Spectrum).
-* Most of the logo graphics is from Dizzy III - Fantazy World (ZX Spectrum).
+* Dizzy animation is original but inspired by Fast Food (Codemasters, 1989).
+* Most of the logo graphics is from Dizzy III - Fantazy World (Codemasters, 1989).
+* Bang animation is from Shoot-Out (ZX Spectrum, Martech games, 1989).
 
 #### Lens
 
@@ -72,18 +73,7 @@ Check out some good remixes:
 
 I am not sure why it used Xixit sprites but not the music. It is available in s3m, rippable with ripper4.
 
-Youtube: https://youtu.be/zQZCZ0GGZds
-
-* 0:44 Exuding Titleness (Necros)
-* 4:13 Pentagonal Dreams (Necros)
-* 8:06 Unnamed Track 1
-* 11:49 Visionary (Nemesis)
-* 16:14 Sacred Grounds (C.C. Catch)
-* 19:52 Unnamed Track 2
-* 23:58 Unnamed Track 3
-* (Samples track)
-
-They are not used in the original games but I think they are awesome.
+Youtube: https://youtu.be/zQZCZ0GGZds (they are not used here).
 
 ### Sound Effects
 
@@ -91,15 +81,15 @@ Fortnoks uses [BSWB (Bells, Whistles and Sound Boards)](https://www.phatcode.net
 GDM module format is BSWB proprietary and cannot be converted back.
 It also includes sound samples, namely (enum value is sample number minus 1 in hex):
 
-sample | enum
----|---
-17.Yeah.wav | end_level=$10;
-18.Brlrlrlm.wav | place_gem=$11;
-19.hahaha.wav | fail_level=$12;
-20.tumtum.wav | move_gem=$13;
-21.Builthit.wav | select_item=$14;
-22.Gbelev02.wav | move_in_menu=$15; activate_menu=$15;
-23.Item15.wav | deactivate_menu=$16;
+sample | ids | hex
+---|---|---
+17.Yeah.wav | end_level | 0x10
+18.Brlrlrlm.wav | place_gem | 0x11
+19.hahaha.wav | fail_level | 0x12
+20.tumtum.wav | move_gem | 0x13
+21.Builthit.wav | select_item | 0x14
+22.Gbelev02.wav | move_in_menu, activate_menu | 0x15
+23.Item15.wav | deactivate_menu | 0x16
 
 Samples use the original GDM (General Digital Music) format which is similar to S3M modules.
 The easiest way to extract samples from it is to use existing converters/players, e.g. MegaZeux.
