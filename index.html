@@ -510,7 +510,7 @@ function drawTextExt(s, x,y, tileset, name, dryrun=false) {
 function drawText(s, x,y, tileset, name, align) {
   let w = drawTextExt(s, x, y, tileset, name, true);
   if (align & ALIGN_CENTER) x = x - ~~(w/2);
-  if (align & ALIGN_RIGHT) x = x - w;
+  if (align & ALIGN_RIGHT) x = x - w - 4;
   drawTextExt(s, x, y, tileset, name, false);
 }
 
@@ -777,8 +777,10 @@ function drawLevel(data) {
     sh = 16;
   }
 
+  let ph = tileset=='dw' ? sh*2 : sh;
+
   let dx = (canvas.width - sw * gw) / 2;
-  let dy = 0;//(canvas.height - sh * gh) / 2;
+  let dy = ~~((canvas.height - sh * gh - ph) / 2);
 
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -846,12 +848,17 @@ function drawLevel(data) {
 
   }
 
-  if (tileset!='fn') {
-    drawText('LEVEL '+zeroPad(level+1,2), dx + gw*sw/2, dy + gh*sh + ~~(sh/2), tileset, 'font', ALIGN_CENTER);
+  // draw level text
+  let text = (tileset!='fn' ? 'LEVEL ' : '') +zeroPad(level+1,2)
+  let gap = tileset=='dw' ? ~~(sh/2) : 1;
+
+  if (tileset == 'fn') {
+    drawText(text, dx + gw*sw, dy + gh*sh + gap, tileset, 'font', ALIGN_RIGHT);
   } else {
-    drawText(zeroPad(level+1,2), dx + gw*sw - sw/4, dy + gh*sh + ~~(sh/2), tileset, 'font', ALIGN_RIGHT);
+    drawText(text, dx + gw*sw/2, dy + gh*sh + gap, tileset, 'font', ALIGN_CENTER);
   }
 
+  // draw player
   player.draw(dx, dy, sw, sh);
 }
 
