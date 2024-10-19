@@ -497,6 +497,7 @@ function preloadImages(callback) {
 const ALIGN_CENTER = 1;
 const ALIGN_BOTTOM = 2;
 const ALIGN_RIGHT = 4;
+const ALIGN_MIDDLE = 8;
 
 function drawTextExt(s, x,y, tileset, name, dryrun=false) {
   let [gid,start,total] = config.tilesets[tileset]['sprites'][name];
@@ -565,6 +566,7 @@ function drawSprite(x, y, tileset, name, index=0, align=0, animated=0) {
 
   if (image) {
     if (align & ALIGN_CENTER) x = x - ~~(image.width/2);
+    if (align & ALIGN_MIDDLE) y = y - ~~(image.height/2);
     if (align & ALIGN_BOTTOM) y = y - image.height;
     if (align & ALIGN_RIGHT) x = x - image.width;
     ctx.drawImage(image, x, y);
@@ -833,6 +835,8 @@ function drawLevel(data) {
     }
   }
 
+  let boxes = [];
+
   for (let i = 0; i < gh; i++) {
     for (let j = 0; j < gw; j++) {
       let c = data[i][j].type;
@@ -851,6 +855,8 @@ function drawLevel(data) {
       }
 
       drawSprite(x, y, tileset, c==T_DONE && tileset !='dw' ? 'box': name, index, 0, tileset=='dw' && name=='box');
+
+      boxes.push([x,y]);
     }
   }
 
@@ -877,6 +883,36 @@ function drawLevel(data) {
 
   // draw player
   player.draw(dx, dy, sw, sh);
+
+  // draw stars
+  if (tileset=='lens') {
+    drawStars(dx, dy, sw, sh, boxes);
+  } else {
+    stars = [];
+  }
+}
+
+let stars = [];
+
+function drawStars(dx, dy, sw, sh, boxes){
+  let frames = [0,1,2,1];
+  let count = 25;
+  let ttl = 250;
+
+  for (let i=0; i<count; i++) {
+    if (stars.length<=i || stars[i][2] + ttl < Date.now()) {
+      let start = Date.now();
+
+      if (stars.length<=i) start -= ~~(Math.random()*ttl);
+
+      let [x,y] = boxes[~~(Math.random() * boxes.length)];
+      let [rx,ry] = [~~(Math.random()*sw), ~~(Math.random()*sh)];
+      stars[i] = [x + rx, y + ry, start];
+    }
+    let [x,y,t] = stars[i];
+    let frame = ~~ ( frames.length * (Date.now() - t) / ttl);
+    drawSprite(x, y, 'fn', 'stars', frames[frame], ALIGN_CENTER | ALIGN_MIDDLE);
+  }
 }
 
 let frames = 0;
