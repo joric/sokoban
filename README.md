@@ -24,7 +24,7 @@ Palette data is stored independently.
 
 #### Dizzy Warehouse
 
-Dizzy warehouse uses Dizzy Down Rapids animation, other sprites are original.
+Dizzy warehouse uses Dizzy Fast Food animation, other sprites are original.
 
 #### Lens
 
