@@ -731,7 +731,7 @@ Player.prototype.move = function(dx, dy) {
 
     if (sec.type==T_PLACE && prim.type!=T_DONE) {
       this.sound = audio['done'];
-    } else if (ter.type==T_WALL || ter.type==T_BOX || ter.type==T_DONE) {
+    } else if (prim.type!=T_DONE && (ter.type==T_WALL || ter.type==T_BOX || ter.type==T_DONE)) {
       this.sound = audio['box'];
     }
 
