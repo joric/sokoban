@@ -597,6 +597,7 @@ Player.prototype.init = function(x,y,data) {
   this.dy = 0;
   this.data = data;
   this.anim = 'player';
+  this.delay = 200;
 };
 
 Player.prototype.peek = function(x,y) {
@@ -633,13 +634,12 @@ Player.prototype.update = function(left, top, sw, sh) {
   let [x,y] = [this.x * sw, this.y * sh]
   let [x0,y0] = [this.x * sw - (dx*sw), this.y * sh - (dy*sh)]
 
-  let duration = 250;
   let dt = Date.now() - this.start;
 
   this.sx = x;
   this.sy = y;
 
-  if (dt >= duration) {
+  if (dt >= this.delay) {
     busy = false;
     carry = -1;
     this.dx = 0;
@@ -660,12 +660,12 @@ Player.prototype.update = function(left, top, sw, sh) {
     }
 
     if (this.sound) {
-      this.sound.play();
+      //this.sound.play(); // wait until mute implementation
       this.sound = null;
     }
 
   } else {
-    let k = dt / duration;
+    let k = dt / this.delay;
     x = x0 + (dx * sw) * k;
     y = y0 + (dy * sh) * k;
     this.sx = x;
@@ -697,6 +697,7 @@ faceTime = null;
 Player.prototype.move = function(dx, dy) {
 
   if (dx==0 && dy==0) {
+    this.delay = 250;
     return false;
   }
 
@@ -905,6 +906,8 @@ function play() {
     player.move(0,0);
     return;
   }
+
+  player.delay = 50;
 
   let d = solution[0];
   let res = false
