@@ -20,7 +20,7 @@ Sokoban Anniversary Edition. Includes Dizzy Warehouse (1996), Lens (1998) and Fo
 * Walls, gems, game panel, 16x16 font use original graphics.
 * Dizzy animation is original but inspired by "Fast Food" (Codemasters, 1989).
 * Most of the logo graphics is from "Dizzy III - Fantazy World" (Codemasters, 1989).
-* Bang animation is from "West Bank" (Gremlin Graphics, 1985)
+* Bang animation is from "West Bank" (Gremlin Graphics, 1985).
 
 ### Lens
 
@@ -38,7 +38,8 @@ Lens uses various sources, sometimes with an altered (rotated) palette.
 
 ### Fortnoks
 
-* Walls - original hand-painted
+* Walls - original, hand-painted.
+* Font and logo - original, rendered in 3D Studio, DOS version (1990).
 * Gems - gem sprites from Xixit (1995) by Optik Software, Inc.
 
 #### Music
