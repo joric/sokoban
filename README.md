@@ -24,7 +24,9 @@ Palette data is stored independently.
 
 #### Dizzy Warehouse
 
-Dizzy Warehouse sprites and levels are original, Dizzy animation inspired by Fast Food (ZX Spectrum).
+* Walls, gems, game panel, 16x16 font use original graphics.
+* Dizzy animation is original but inspired by Fast Food (ZX Spectrum).
+* Most of the logo graphics is from Dizzy III - Fantazy World (ZX Spectrum).
 
 #### Lens
 
