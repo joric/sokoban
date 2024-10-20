@@ -940,6 +940,10 @@ function updateState(selector, enabled) {
 }
 
 function update(timestep) {
+  updateState('#dw', tileset!='dw');
+  updateState('#lens', tileset!='lens');
+  updateState('#fn', tileset!='fn');
+
   updateState('#reset', history_pos!=0);
   updateState('#solve', solution.length>0 && !playing);
   updateState('#undo', history_pos!=0);
