@@ -482,7 +482,7 @@ function preloadImages(callback) {
 
         images[path].onload = function() {
           if (++loadedImages >= numImages) {
-            callback();
+            callback && callback();
           }
         };
 
@@ -1031,10 +1031,17 @@ window.onload = function(event) {
   audio['box'] = new Audio('data/fn/sounds/tumtum.wav');
   audio['done'] = new Audio('data/fn/sounds/Brlrlrlm.wav');
 
+  /*
   preloadImages(function() {
     loadLevel(level);
     window.requestAnimationFrame(update);
   });
+  */
+
+  // load images asyncronously
+  preloadImages();
+  loadLevel(level);
+  window.requestAnimationFrame(update);
 
 
   function onLeft() { pressed['ArrowLeft'] = true; }
