@@ -148,8 +148,12 @@ let TILE_HEIGHT = 17;
 let COLS = 16;
 let ROWS = 10;
 
-let tileset = 'fn';
-let level = 0;
+let localDataName = 'sokoban';
+let localData = JSON.parse(localStorage.getItem(localDataName)) || {};
+
+let tileset = localData.tileset || 'fn';
+let level = localData.level || 0;
+
 let audio = {};
 let history = [];
 let history_pos = 0;
@@ -796,6 +800,9 @@ function loadLevel(i) {
   history_pos = 0;
   takeSnapshot();
   getSolution();
+
+  localData.level = level;
+  saveSettings();
 }
 
 // Draw the map using preloaded images
@@ -1096,6 +1103,15 @@ function undo() {
   }
 }
 
+function setTileset(s) {
+  tileset = localData.tileset = s;
+  saveSettings();
+}
+
+function saveSettings() {
+  localStorage.setItem(localDataName, JSON.stringify(localData));
+}
+
 window.onload = function(event) {
   document.addEventListener('keyup', (e) => {
     delete pressed[e.code];
@@ -1104,9 +1120,9 @@ window.onload = function(event) {
   document.addEventListener('keydown', (e) => {
     pressed[e.code] = true;
     switch (e.code) {
-      case 'Digit1': tileset='dw'; break;
-      case 'Digit2': tileset='lens'; break;
-      case 'Digit3': tileset='fn'; break;
+      case 'Digit1': setTileset('dw'); break;
+      case 'Digit2': setTileset('lens'); break;
+      case 'Digit3': setTileset('fn'); break;
       case 'KeyZ': e.shiftKey ? prevLevel() : undo(); break;
       case 'KeyX': e.shiftKey ? nextLevel() : redo(); break;
       case 'KeyR': reset(); break;
