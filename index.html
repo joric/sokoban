@@ -1142,7 +1142,7 @@ window.onload = function(event) {
   //solve();
   window.requestAnimationFrame(update);
 
-  document.querySelectorAll('.btnTileset').forEach(c=>{ c.onclick = e=> { tileset=e.target.id; } });
+  document.querySelectorAll('.btnTileset').forEach(c=>{ c.onclick = e=> { setTileset(e.target.id); } });
   document.querySelectorAll('.btnLevel').forEach(c=>{ c.onclick = e=> { e.target.id=='undo' ? undo() : redo() } });
   document.querySelectorAll('.btnSolve').forEach(c=>{ c.onclick = e=> { solve(); } });
   document.querySelectorAll('.btnReset').forEach(c=>{ c.onclick = e=> { reset(); } });
