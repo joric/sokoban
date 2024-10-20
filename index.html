@@ -93,6 +93,10 @@ canvas {
   border: 0;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+}
+
 </style>
 
 <!--script src="js/YASS_loader.js"></script-->
@@ -113,8 +117,8 @@ canvas {
 </div>
 
 <div class="controls bottom-left">
-  <button class="btn btnLevel" id="back" title="prevous level">Z</button>
-  <button class="btn btnLevel" id="forward" title="next level">X</button>
+  <button class="btn btnLevel" id="undo" title="undo">Z</button>
+  <button class="btn btnLevel" id="redo" title="redo">X</button>
 </div>
 
 <div class="controls bottom-left-up">
@@ -147,6 +151,8 @@ let ROWS = 10;
 let tileset = 'fn';
 let level = 0;
 let audio = {};
+let history = [];
+let history_pos = 0;
 
 const T_EMPTY = ' ';
 const T_WALL = '#';
@@ -587,7 +593,7 @@ let busy = false;
 let carry = -1;
 
 function Player(){}
-function Cell(type, id) { this.type = type; this.id = id; }
+function Cell(type, id) { this.type = type; if (id !== undefined) this.id = id; }
 
 let player = new Player();
 
@@ -754,6 +760,9 @@ Player.prototype.move = function(dx, dy) {
     carry = id;
   }
 
+  // save history. it's basically coordinates of all the dynamic objects and a player
+  takeSnapshot();
+
   return true;
 };
 
@@ -783,13 +792,14 @@ function loadLevel(i) {
   }
   player.init(x, y, data);
   player.blocks = id-1;
+
+  history = [];
+  history_pos = 0;
+  takeSnapshot();
 }
 
 // Draw the map using preloaded images
 function drawLevel(data) {
-  let gw = 16;
-  let gh = 10;
-
   let sw = 20;
   let sh = 17;
 
@@ -798,8 +808,10 @@ function drawLevel(data) {
     sh = 16;
   }
 
-  let ph = tileset=='dw' ? sh*2 : sh;
+  let gw = data[0].length;
+  let gh = data.length;
 
+  let ph = tileset=='dw' ? sh*2 : sh;
   let dx = (canvas.width - sw * gw) / 2;
   let dy = ~~((canvas.height - sh * gh - ph) / 2);
 
@@ -920,7 +932,22 @@ function drawStars(dx, dy, sw, sh, boxes){
 let frames = 0;
 let startTime = 0;
 
+function updateState(selector, enabled) {
+  let b = document.querySelector(selector);
+  if (b) {
+    b.disabled = !enabled; 
+  }
+}
+
 function update(timestep) {
+  updateState('#solve', solution.length == 0);
+  updateState('#undo', history_pos!=0);
+  updateState('#redo', history_pos!=history.length-1);
+
+  //updateState('#left', player.canMove(-1,0));
+  //updateState('#right', player.canMove(1,0));
+  //updateState('#up', player.canMove(0,-1));
+  //updateState('#down', player.canMove(0,1));
 
   let time = Date.now();
   let dt = time - startTime;
@@ -966,12 +993,22 @@ function play() {
 
 function stop() {
   solution = [];
-  document.querySelector('#solve').disabled = false;
+}
+
+function solve_callback(moves) {
+  console.log('solve_callback', moves);
+}
+
+let worker = null;
+
+try {
+  worker = new Worker('js/worker.js');
+} catch {
+  console.log('could not load worker, CORS?');
 }
 
 function solve() {
-  let btn = document.querySelector('#solve');
-  if (btn.disabled || solution.length!=0) return;
+  if (solution.length!=0) return;
 
   let args = [];
   for (let i=0; i<player.data.length; i++) {
@@ -984,30 +1021,63 @@ function solve() {
     args.push(s);
   }
 
-  const worker = new Worker('js/worker.js');
+  if (worker) {
+    worker.onmessage = (event) => {
+      //console.log("WASM result:", event.data);
+      let output = event.data.join('\n');
+      if (!output.includes('not solved')) {
+        let res = output.split('\n\n').pop().replaceAll('\n','');
+        //console.log('solution:', res);
+        solution = [...res.toLowerCase()];
+        //solve_callback(solution);
+        play();
+      } else {
+        console.log('NO SOLUTION');
+        stop();
+      }
+    };
 
-  btn.disabled = true;
-
-  worker.onmessage = (event) => {
-    //console.log("WASM result:", event.data);
-    let output = event.data.join('\n');
-    if (!output.includes('not solved')) {
-      let res = output.split('\n\n').pop().replaceAll('\n','');
-      console.log('solution:', res);
-      solution = [...res.toLowerCase()];
-      play();
-    } else {
-      console.log('NO SOLUTION');
-      stop();
-    }
-  };
-
-  worker.postMessage({ args: ['YASS', '-inline', ...args] });
+    worker.postMessage({ args: ['YASS', '-inline', ...args] });
+  }
 }
 
 function reset() { loadLevel(level); }
 function nextLevel() {level<levels.length-1 && loadLevel(level+1);}
 function prevLevel() {level>0 && loadLevel(level-1);}
+
+function takeSnapshot() {
+  // just serialize player data for now, no complicated stuff
+  // structured clone fails for some reason, so do JSON stringify/parse
+  let snapshot = {x:player.x, y:player.y, data: JSON.stringify(player.data)};
+
+  // the history is now "dirty", so we cut at history_pos
+  // we do not branch so the history pos is always at the end
+  history = history.slice(0, history_pos + 1);
+  history.push(snapshot);
+  history_pos = history.length - 1;
+  //console.log(history_pos, history.length);
+}
+
+function applySnapshot(snapshot) {
+  player.data = JSON.parse(snapshot.data);
+  player.x = snapshot.x;
+  player.y = snapshot.y;
+}
+
+function redo() {
+  if (history.length > history_pos + 1){
+    history_pos += 1;
+    applySnapshot(history[history_pos]);
+  }
+}
+
+function undo() {
+  //console.log(history_pos, history.length);
+  if (history_pos > 0 && history.length > history_pos - 1) {
+    history_pos -= 1;
+    applySnapshot(history[history_pos]);
+  }
+}
 
 window.onload = function(event) {
   document.addEventListener('keyup', (e) => {
@@ -1020,8 +1090,8 @@ window.onload = function(event) {
       case 'Digit1': tileset='dw'; break;
       case 'Digit2': tileset='lens'; break;
       case 'Digit3': tileset='fn'; break;
-      case 'KeyZ': prevLevel(); break;
-      case 'KeyX': nextLevel(); break;
+      case 'KeyZ': e.shiftKey ? prevLevel() : undo(); break;
+      case 'KeyX': e.shiftKey ? nextLevel() : redo(); break;
       case 'KeyR': reset(); break;
       case 'KeyE': solve(); break;
       case 'Escape': stop(); break;
@@ -1034,10 +1104,11 @@ window.onload = function(event) {
   // load images asyncronously
   preloadImages();
   loadLevel(level);
+  //solve();
   window.requestAnimationFrame(update);
 
   document.querySelectorAll('.btnTileset').forEach(c=>{ c.onclick = e=> { tileset=e.target.id; } });
-  document.querySelectorAll('.btnLevel').forEach(c=>{ c.onclick = e=> { e.target.id=='back' ? prevLevel() : nextLevel() } });
+  document.querySelectorAll('.btnLevel').forEach(c=>{ c.onclick = e=> { e.target.id=='undo' ? undo() : redo() } });
   document.querySelectorAll('.btnSolve').forEach(c=>{ c.onclick = e=> { solve(); } });
   document.querySelectorAll('.btnReset').forEach(c=>{ c.onclick = e=> { reset(); } });
 
