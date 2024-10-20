@@ -1031,46 +1031,21 @@ window.onload = function(event) {
   audio['box'] = new Audio('data/fn/sounds/tumtum.wav');
   audio['done'] = new Audio('data/fn/sounds/Brlrlrlm.wav');
 
-  /*
-  preloadImages(function() {
-    loadLevel(level);
-    window.requestAnimationFrame(update);
-  });
-  */
-
   // load images asyncronously
   preloadImages();
   loadLevel(level);
   window.requestAnimationFrame(update);
 
+  document.querySelectorAll('.btnTileset').forEach(c=>{ c.onclick = e=> { tileset=e.target.id; } });
+  document.querySelectorAll('.btnLevel').forEach(c=>{ c.onclick = e=> { e.target.id=='back' ? prevLevel() : nextLevel() } });
+  document.querySelectorAll('.btnSolve').forEach(c=>{ c.onclick = e=> { solve(); } });
+  document.querySelectorAll('.btnReset').forEach(c=>{ c.onclick = e=> { reset(); } });
 
-  function onLeft() { pressed['ArrowLeft'] = true; }
-  function onRight() { pressed['ArrowRight'] = true; }
-  function onUp() { pressed['ArrowUp'] = true; }
-  function onDown() { pressed['ArrowDown'] = true; }
-  function onRelease() { pressed = {}; }
-
-
-  document.querySelectorAll('.btnTileset').forEach(c=> { c.onclick = e=> { e.preventDefault(); tileset=e.target.id; } });
-  document.querySelectorAll('.btnLevel').forEach(c=> { c.onclick = e=> { e.preventDefault(); e.target.id=='back' ? prevLevel() : nextLevel() } });
-  document.querySelectorAll('.btnSolve').forEach(c=> { c.onclick = e=> { e.preventDefault(); solve(); } });
-  document.querySelectorAll('.btnReset').forEach(c=> { c.onclick = e=> { e.preventDefault(); reset(); } });
-
-  document.querySelectorAll('.btnMove').forEach(c=> {
-
-    let t = {'left': onLeft, 'right': onRight, 'up':onUp, 'down':onDown};
-
-    c.onmousedown = e=> { e.preventDefault(); t[e.target.id](); };
-
-    c.ontouchstart = e=> { e.preventDefault(); t[e.target.id](); };
-
-    c.onmouseup = onRelease;
-    c.onmouseout = onRelease;
-    c.ontouchend = onRelease;
-
-
+  document.querySelectorAll('.btnMove').forEach(c=>{
+    let capitalize = s=>s.charAt(0).toUpperCase()+s.slice(1);
+    c.onmousedown = c.ontouchstart = e=>{ e.preventDefault(); pressed['Arrow'+capitalize(e.target.id)] = true; };
+    c.onmouseup = c.onmouseout = c.ontouchend = ()=>pressed={};
   });
-
 
 }
 
