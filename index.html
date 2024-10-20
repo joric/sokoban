@@ -952,7 +952,7 @@ function update(timestep) {
   updateState('#fn', tileset!='fn');
 
   updateState('#reset', history_pos!=0);
-  updateState('#solve', solution.length>0 && !playing);
+  updateState('#solve', solution.length>0);
   updateState('#undo', history_pos!=0);
   updateState('#redo', history_pos!=history.length-1);
 
