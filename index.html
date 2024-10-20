@@ -627,7 +627,6 @@ Player.prototype.copy = function(x,y,c) {
 };
 
 Player.prototype.update = function(left, top, sw, sh) {
-
   let v = {};
   for (key of Object.keys(bindings)) {
     if (pressed[key]) {
@@ -703,7 +702,7 @@ Player.prototype.canMove = function(dx, dy) {
 
 faceTime = null;
 
-Player.prototype.move = function(dx, dy) {
+Player.prototype.move = function(dx, dy, auto=false) {
 
   if (dx==0 && dy==0) {
     this.delay = 250;
@@ -724,7 +723,7 @@ Player.prototype.move = function(dx, dy) {
   this.anim = dx != 0 ? (dx<0 ?  'left' : 'right') :  dy != 0 ? (dy<0 ?  'up' : 'down') : this.anim;
 
   clearTimeout(faceTime);
-  faceTime = setTimeout(function() { player.anim = 'player'; }, 150);
+  faceTime = setTimeout(function() { player.anim = 'player';  getSolution(); }, 150);
 
   if (busy) return false;
 
@@ -796,6 +795,7 @@ function loadLevel(i) {
   history = [];
   history_pos = 0;
   takeSnapshot();
+  getSolution();
 }
 
 // Draw the map using preloaded images
@@ -941,7 +941,7 @@ function updateState(selector, enabled) {
 
 function update(timestep) {
   updateState('#reset', history_pos!=0);
-  updateState('#solve', solution.length == 0);
+  updateState('#solve', solution.length>0 && !playing);
   updateState('#undo', history_pos!=0);
   updateState('#redo', history_pos!=history.length-1);
 
@@ -965,9 +965,10 @@ function update(timestep) {
 }
 
 let solution = [];
+let playing = false;
 
 function play() {
-  if (solution.length==0) {
+  if (solution.length==0 || !playing) {
     stop();
     player.move(0,0);
     return;
@@ -979,10 +980,10 @@ function play() {
   let res = false
 
   switch(d) {
-    case 'l': res = player.move(-1,0); break;
-    case 'r': res = player.move(1,0); break;
-    case 'u': res = player.move(0,-1); break;
-    case 'd': res = player.move(0,1); break;
+    case 'l': res = player.move(-1,0, true); break;
+    case 'r': res = player.move(1,0, true); break;
+    case 'u': res = player.move(0,-1, true); break;
+    case 'd': res = player.move(0,1, true); break;
   }
 
   if (res) {
@@ -993,11 +994,7 @@ function play() {
 }
 
 function stop() {
-  solution = [];
-}
-
-function solve_callback(moves) {
-  console.log('solve_callback', moves);
+  playing = false;
 }
 
 let worker = null;
@@ -1008,8 +1005,8 @@ try {
   console.log('could not load worker, CORS?');
 }
 
-function solve() {
-  if (solution.length!=0) return;
+function getSolution() {
+  solution = [];
 
   let args = [];
   for (let i=0; i<player.data.length; i++) {
@@ -1023,6 +1020,16 @@ function solve() {
   }
 
   if (worker) {
+    worker.terminate();
+
+    try {
+      worker = new Worker('js/worker.js');
+    } catch {
+      console.log('could not load worker, CORS?');
+    }
+
+    //console.log('getting solution...');
+
     worker.onmessage = (event) => {
       //console.log("WASM result:", event.data);
       let output = event.data.join('\n');
@@ -1030,15 +1037,20 @@ function solve() {
         let res = output.split('\n\n').pop().replaceAll('\n','');
         //console.log('solution:', res);
         solution = [...res.toLowerCase()];
-        //solve_callback(solution);
-        play();
       } else {
-        console.log('NO SOLUTION');
-        stop();
+        //console.log('NO SOLUTION');
+        //stop();
       }
     };
 
     worker.postMessage({ args: ['YASS', '-inline', ...args] });
+  }
+}
+
+function solve() {
+  if (solution && !playing) {
+    playing = true;
+    play();
   }
 }
 
@@ -1063,6 +1075,7 @@ function applySnapshot(snapshot) {
   player.data = JSON.parse(snapshot.data);
   player.x = snapshot.x;
   player.y = snapshot.y;
+  getSolution();
 }
 
 function redo() {
@@ -1073,7 +1086,6 @@ function redo() {
 }
 
 function undo() {
-  //console.log(history_pos, history.length);
   if (history_pos > 0 && history.length > history_pos - 1) {
     history_pos -= 1;
     applySnapshot(history[history_pos]);
