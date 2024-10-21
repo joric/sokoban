@@ -1042,12 +1042,6 @@ function stop() {
 
 let worker = null;
 
-try {
-  worker = new Worker('js/worker.js');
-} catch {
-  console.log('could not load worker, CORS?');
-}
-
 function getSolution() {
   solution = [];
 
@@ -1062,15 +1056,15 @@ function getSolution() {
     args.push(s);
   }
 
+  if (worker) worker.terminate();
+
+  try {
+    worker = new Worker('js/worker.js');
+  } catch {
+    console.log('Could not load solver, CORS?');
+  }
+
   if (worker) {
-    worker.terminate();
-
-    try {
-      worker = new Worker('js/worker.js');
-    } catch {
-      console.log('could not load worker, CORS?');
-    }
-
     //console.log('getting solution...');
 
     worker.onmessage = (event) => {
