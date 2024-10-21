@@ -802,9 +802,7 @@ function loadLevel(i) {
 
   localData.level = level;
   saveSettings();
-
   initSparkles();
-  initStars();
 }
 
 // Draw the map using preloaded images
@@ -1176,7 +1174,7 @@ window.onload = function(event) {
   // load images asyncronously
   preloadImages();
   loadLevel(level);
-  //solve();
+  initStars();
   window.requestAnimationFrame(update);
 
   document.querySelectorAll('.btnTileset').forEach(c=>{ c.onclick = e=> { setTileset(e.target.id); } });
