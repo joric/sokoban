@@ -772,7 +772,6 @@ Player.prototype.move = function(dx, dy, auto=false) {
 function loadLevel(i) {
   level = i;
   stop();
-  stars = [];
   let src = levels[level];
   let data = [];
   let [x,y] = [0,0];
@@ -803,6 +802,9 @@ function loadLevel(i) {
 
   localData.level = level;
   saveSettings();
+
+  initSparkles();
+  initStars();
 }
 
 // Draw the map using preloaded images
@@ -834,6 +836,10 @@ function drawLevel(data) {
   };
 
   player.update(dx, dy, sw, sh);
+
+  if (tileset=='fn') {
+    drawStars();
+  }
 
   // need to render twice for two layers (static / dynamic)
 
@@ -905,36 +911,64 @@ function drawLevel(data) {
   // draw player
   player.draw(dx, dy, sw, sh);
 
-  // draw stars
+  // draw sparkles
   if (tileset=='lens') {
-    drawStars(dx, dy, sw, sh, boxes);
-  } else {
-    stars = [];
+    drawSparkles(boxes, sw, sh);
   }
 }
 
-let stars = [];
+let sparkles = [];
 
-function drawStars(dx, dy, sw, sh, boxes){
+function initSparkles() { sparkles = []; }
+
+function drawSparkles(boxes, sw, sh){
   let frames = [0,1,2,1];
   let count = 25;
   let ttl = 250;
-
   for (let i=0; i<count; i++) {
-    if (stars.length<=i || stars[i][2] + ttl < Date.now()) {
+    if (sparkles.length<=i || sparkles[i][2] + ttl < Date.now()) {
       let start = Date.now();
-
-      if (stars.length<=i) start -= ~~(Math.random()*ttl);
-
+      if (sparkles.length<=i) start -= ~~(Math.random()*ttl);
       let [x,y] = boxes[~~(Math.random() * boxes.length)];
       let [rx,ry] = [~~(Math.random()*sw), ~~(Math.random()*sh)];
-      stars[i] = [x + rx, y + ry, start];
+      sparkles[i] = [x + rx, y + ry, start];
     }
-    let [x,y,t] = stars[i];
+    let [x,y,t] = sparkles[i];
     let frame = ~~ ( frames.length * (Date.now() - t) / ttl);
     drawSprite(x, y, 'fn', 'stars', frames[frame], ALIGN_CENTER | ALIGN_MIDDLE);
   }
 }
+
+let stars = [];
+function putPixel(x,y,color) {
+  ctx.fillStyle = `rgba(255,255,255, ${color})`;
+  ctx.fillRect(x,y,1,1);
+}
+
+function initStars() {
+  let [w,h] = [ctx.canvas.width,ctx.canvas.height];
+  stars = Array.from({ length: 100 }, () => ({x: Math.random()*w-w/2, y: Math.random()*h-h/2, z: 1}));
+}
+
+function drawStars(){
+  let [w,h] = [ctx.canvas.width,ctx.canvas.height];
+  stars.forEach((star) => {
+    star.x /= star.z;
+    star.y /= star.z;
+    star.z -= 0.0005;
+    if (Math.abs(star.x)>w/2 || Math.abs(star.y)>h/2 || (star.x===0 && star.y===0) || star.z<=0) {
+      star.x = Math.random() * w - w/2;
+      star.y = Math.random() * h - h/2;
+      star.z = 1;
+    }
+    let [x,y] = [~~(star.x + w/2), ~~(star.y + h/2)];
+    let zmin = 0.97;
+    let c = (star.z - zmin) / (1 - zmin);
+    putPixel(x, y, 1-c);
+  });
+}
+
+// ----------------
 
 let frames = 0;
 let startTime = 0;
