@@ -1140,8 +1140,11 @@ function undo() {
 }
 
 function setTileset(s) {
-  tileset = localData.tileset = s;
-  saveSettings();
+  if (s!=tileset) {
+    tileset = localData.tileset = s;
+    initSparkles();
+    saveSettings();
+  }
 }
 
 function saveSettings() {
