@@ -947,7 +947,7 @@ function drawSparkles(boxes, sw, sh){
 }
 
 let stars = [];
-function putPixel(x,y,color) {
+function drawPixel(x,y,color) {
   ctx.fillStyle = `rgba(255,255,255, ${color})`;
   ctx.fillRect(x,y,1,1);
 }
@@ -971,9 +971,53 @@ function drawStars(){
     let [x,y] = [~~(star.x + w/2), ~~(star.y + h/2)];
     let zmin = 0.97;
     let c = (star.z - zmin) / (1 - zmin);
-    putPixel(x, y, 1-c);
+    drawPixel(x, y, 1-c);
   });
 }
+
+// ugly but deterministic version
+function drawStars2() {
+  const PARTICLE_COUNT = 1000;
+  const PARTICLE_TTL = 1000;
+  let [w,h] =[ctx.canvas.width,  ctx.canvas.height];
+
+  function seededRandom(seed) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function getParticleSpawnTime(particleIndex) {
+    return seededRandom(particleIndex) * PARTICLE_TTL;
+  }
+
+  function getParticleProperties(particleIndex, globalTime) {
+    const spawnTimeOffset = getParticleSpawnTime(particleIndex);
+    const timeSeed = Math.floor((globalTime + spawnTimeOffset + PARTICLE_TTL*2) / PARTICLE_TTL);
+    const startX = seededRandom(timeSeed * particleIndex) * w;
+    const startY = seededRandom(timeSeed * particleIndex + 1) * h;
+    const startZ = 1;
+    const endX = startX;
+    const endY = startY;
+    const endZ = 0.5;
+    return { spawnTimeOffset, startX, startY, startZ, endX, endY, endZ };
+  }
+
+  function drawParticle(particleIndex, globalTime) {
+    const { spawnTimeOffset, startX, startY, startZ, endX, endY, endZ } = getParticleProperties(particleIndex, globalTime);
+    const particleTime = (globalTime + spawnTimeOffset + PARTICLE_TTL*2) % PARTICLE_TTL;
+    const t = particleTime / PARTICLE_TTL;
+    const z = startZ + (endZ - startZ) * t;
+    const x = w/2 + (startX - w/2) / z;
+    const y = h/2 + (startY - h/2) / z;
+    drawPixel(Math.floor(x), Math.floor(y), t);
+  }
+
+  const now = performance.now();
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    drawParticle(i, now);
+  }
+}
+
 
 // ----------------
 
