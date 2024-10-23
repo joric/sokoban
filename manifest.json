@@ -1,0 +1,21 @@
+{
+  "name": "Sokoban Anniversary",
+  "short_name": "Sokoban",
+  "description": "Sokoban Anniversary Game",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "fullscreen"
+}

@@ -5,7 +5,15 @@
 <title>Sokoban</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="icon" href="data:,">
+<link rel="icon" href="data:">
+<meta property="og:image" content="icons/icon-256x256.png" />
+<meta property="og:title" content="Sokoban" />
+<meta property="og:description" content="Sokoban Anniversary" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#fff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
 
 * {
@@ -407,7 +415,7 @@ let config = {
         "box": [0,0,4],
         "place": [3,4,1],
         "done": [3,9,1],
-        "player": [0,5,2],
+        "player": [0,5,2, 5,5,6,6],
         "down": [0,8,4],
         "right": [0,24,8],
         "left": [0,16,8],
