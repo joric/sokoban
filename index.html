@@ -147,7 +147,6 @@ canvas {
 </body>
 
 <script>
-let scale = 2.75; // Initial scale
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 
@@ -1236,7 +1235,7 @@ window.onload = function(event) {
   });
 
 }
-
+/*
 function fitCanvas() {
   const container = document.getElementById("responsiveImage");
   const canvas = document.getElementById("gameCanvas");
@@ -1258,6 +1257,31 @@ function fitCanvas() {
 
   container.style.width = `${newWidth}px`;
   container.style.height = `${newHeight}px`;
+}
+*/
+function fitCanvas() {
+    const container = document.getElementById("responsiveImage");
+    const canvas = document.getElementById("gameCanvas");
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Base canvas dimensions
+    const canvasWidth = 320;
+    const canvasHeight = 200;
+
+    // Find maximum integer scale that fits the window
+    const scaleX = Math.floor(windowWidth / canvasWidth);
+    const scaleY = Math.floor(windowHeight / canvasHeight);
+    const scale = Math.max(1, Math.min(scaleX, scaleY));
+
+    const newWidth = canvasWidth * scale;
+    const newHeight = canvasHeight * scale;
+
+    container.style.width = `${newWidth}px`;
+    container.style.height = `${newHeight}px`;
+
+    // TODO: fit canvas to window preserving integer pixel scale
 }
 
 // Ensure the canvas fits when the page loads and on resize
