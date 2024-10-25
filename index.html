@@ -1281,9 +1281,12 @@ function fitCanvas() {
     const canvasHeight = 200;
 
     // Find maximum integer scale that fits the window
-    const scaleX = Math.floor(windowWidth / canvasWidth);
-    const scaleY = Math.floor(windowHeight / canvasHeight);
-    const scale = Math.max(1, Math.min(scaleX, scaleY));
+    const scaleX = windowWidth / canvasWidth;
+    const scaleY = windowHeight / canvasHeight;
+    let scale = Math.max(1, Math.min(scaleX, scaleY));
+
+    // do not clamp to integer before 2x
+    scale = scale < 2 ? scale : ~~scale;
 
     const newWidth = canvasWidth * scale;
     const newHeight = canvasHeight * scale;
