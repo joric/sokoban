@@ -1122,8 +1122,8 @@ function getSolution() {
 
   try {
     worker = new Worker('js/worker.js');
-  } catch {
-    console.log('Could not load solver, CORS?');
+  } catch (e) {
+    console.log('could not load solver:', e);
   }
 
   if (worker) {
