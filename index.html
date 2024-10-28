@@ -788,9 +788,7 @@ Player.prototype.move = function(dx, dy, auto=false) {
   return true;
 };
 
-let effect='';
-
-function loadLevel(i) {
+function loadLevelInternal(i) {
   level = i;
   stop();
   let src = levels[level];
@@ -824,27 +822,50 @@ function loadLevel(i) {
   localData.level = level;
   saveSettings();
   initSparkles();
+}
+
+let enableEffects = true;
+
+let effect = 0;
+let effects = [
+  'flipInX',
+  'flipInY',
+  'bounceIn',
+  'lightSpeedInRight',
+  'lightSpeedInLeft',
+  'rotateIn',
+  'rollIn',
+  'zoomInDown',
+];
+
+let effectCSS = 'animate__animated animate__fast animate__';
+let newLevel = 0;
+
+function loadLevel(i, init) {
+
+  if (enableEffects && !init) {
+
+    newLevel = i;
+    document.getElementById('gameCanvas').className = effectCSS + effects[effect].replace('In','Out');
+
+    function handleAnimationEnd() {
+      document.getElementById('gameCanvas').removeEventListener('animationend', handleAnimationEnd);
+      loadLevelEnd(newLevel);
+    }
+    document.getElementById('gameCanvas').addEventListener('animationend', handleAnimationEnd);
+
+  } else {
+    loadLevelEnd(i);
+  }
+}
 
 
-  let effects = [
-    //'animate__bounce',
-    //'animate__flip',
-    'animate__flipInX',
-    'animate__flipInY',
-    //'animate__rubberBand',
-    'animate__bounceIn',
-    'animate__lightSpeedInRight',
-    'animate__lightSpeedInLeft',
-    'animate__rotateIn',
-    'animate__jackInTheBox',
-    'animate__rollIn',
-    'animate__zoomInDown',
-
-  ];
-
-  effect = effects[ (effects.indexOf(effect) + 1) % effects.length ];
-  document.getElementById('gameCanvas').className = 'animate__animated ' + effect;
-
+function loadLevelEnd(i) {
+  loadLevelInternal(i);
+  if (enableEffects) {
+    effect = (effect + 1) % effects.length;
+    document.getElementById('gameCanvas').className = effectCSS + effects[effect];
+  }
 }
 
 // Draw the map using preloaded images
@@ -1264,7 +1285,7 @@ window.onload = function(event) {
 
   // load images asyncronously
   preloadImages();
-  loadLevel(level);
+  loadLevel(level, true);
   initStars();
   window.requestAnimationFrame(update);
 
