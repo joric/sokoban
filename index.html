@@ -826,15 +826,31 @@ function loadLevelInternal(i) {
 
 let enableEffects = true;
 
-let effect = 0;
+// see https://animate.style/#documentation
+
 let effects = [
+  'bounceIn',
   'flipInX',
   'flipInY',
-  'bounceIn',
+  'rollIn',
+  'rotateIn',
+
   'lightSpeedInRight',
   'lightSpeedInLeft',
-  'rotateIn',
-  'rollIn',
+
+  'backInLeft',
+  'backInRight',
+  'backInUp',
+  'backInDown',
+
+  'bounceInLeft',
+  'bounceInRight',
+  'bounceInUp',
+  'bounceInDown',
+
+  'zoomInLeft',
+  'zoomInRight',
+  'zoomInUp',
   'zoomInDown',
 ];
 
@@ -848,6 +864,7 @@ function loadLevel(i, init) {
         event.currentTarget.removeEventListener('animationend', handleAnimationEnd);
         loadLevelEnd(i);
     });
+    effect = level % effects.length;
     canvas.className = effectCSS + effects[effect].replace('In','Out');
   } else {
     loadLevelEnd(i);
@@ -858,7 +875,7 @@ function loadLevel(i, init) {
 function loadLevelEnd(i) {
   loadLevelInternal(i);
   if (enableEffects) {
-    effect = (effect + 1) % effects.length;
+    effect = level % effects.length;
     canvas.className = effectCSS + effects[effect];
   }
 }
