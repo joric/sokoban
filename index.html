@@ -844,16 +844,11 @@ let newLevel = 0;
 function loadLevel(i, init) {
 
   if (enableEffects && !init) {
-
-    newLevel = i;
-    document.getElementById('gameCanvas').className = effectCSS + effects[effect].replace('In','Out');
-
-    function handleAnimationEnd() {
-      document.getElementById('gameCanvas').removeEventListener('animationend', handleAnimationEnd);
-      loadLevelEnd(newLevel);
-    }
-    document.getElementById('gameCanvas').addEventListener('animationend', handleAnimationEnd);
-
+    canvas.addEventListener('animationend', function handleAnimationEnd(event) {
+        event.currentTarget.removeEventListener('animationend', handleAnimationEnd);
+        loadLevelEnd(i);
+    });
+    canvas.className = effectCSS + effects[effect].replace('In','Out');
   } else {
     loadLevelEnd(i);
   }
@@ -864,7 +859,7 @@ function loadLevelEnd(i) {
   loadLevelInternal(i);
   if (enableEffects) {
     effect = (effect + 1) % effects.length;
-    document.getElementById('gameCanvas').className = effectCSS + effects[effect];
+    canvas.className = effectCSS + effects[effect];
   }
 }
 
