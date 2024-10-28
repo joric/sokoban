@@ -16,6 +16,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+<link rel="stylesheet" href="css/animate.min.css"/>
+
 <style>
 
 * {
@@ -786,6 +788,8 @@ Player.prototype.move = function(dx, dy, auto=false) {
   return true;
 };
 
+let effect='';
+
 function loadLevel(i) {
   level = i;
   stop();
@@ -820,6 +824,27 @@ function loadLevel(i) {
   localData.level = level;
   saveSettings();
   initSparkles();
+
+
+  let effects = [
+    //'animate__bounce',
+    //'animate__flip',
+    'animate__flipInX',
+    'animate__flipInY',
+    //'animate__rubberBand',
+    'animate__bounceIn',
+    'animate__lightSpeedInRight',
+    'animate__lightSpeedInLeft',
+    'animate__rotateIn',
+    'animate__jackInTheBox',
+    'animate__rollIn',
+    'animate__zoomInDown',
+
+  ];
+
+  effect = effects[ (effects.indexOf(effect) + 1) % effects.length ];
+  document.getElementById('gameCanvas').className = 'animate__animated ' + effect;
+
 }
 
 // Draw the map using preloaded images
@@ -1253,7 +1278,6 @@ window.onload = function(event) {
     c.onmousedown = c.ontouchstart = e=>{ e.preventDefault(); pressed['Arrow'+capitalize(e.target.id)] = true; };
     c.onmouseup = c.onmouseout = c.ontouchend = ()=>pressed={};
   });
-
 }
 /*
 function fitCanvas() {
