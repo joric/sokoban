@@ -28,7 +28,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #000;
+  background-color: #222;
 }
 
 #responsiveImage {
@@ -39,7 +39,6 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #000;
 }
 
 canvas {
@@ -840,8 +839,9 @@ function drawLevel(data) {
   let dx = (canvas.width - sw * gw) / 2;
   let dy = ~~((canvas.height - sh * gh - ph) / 2);
 
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //ctx.fillStyle = 'black';
+  //ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   let nameMapping = {
     [T_WALL]: 'wall',
@@ -897,6 +897,10 @@ function drawLevel(data) {
         y = dy + player.sy + player.dy * sh;
       }
 
+      if (c==T_DONE && tileset=='dw') { // clear box place
+        ctx.clearRect(x, y, 16,16);
+      }
+
       drawSprite(x, y, tileset, c==T_DONE && tileset !='dw' ? 'box': name, index, 0, tileset=='dw' && name=='box');
 
       boxes.push([x,y]);
@@ -909,8 +913,14 @@ function drawLevel(data) {
     drawSprite(dx + gw*sw/2, dy + gh*sh + sh*2, tileset, 'panel', 2, ALIGN_CENTER | ALIGN_BOTTOM);
     drawSprite(dx + gw*sw, dy + gh*sh, tileset, 'panel', 3, ALIGN_RIGHT);
 
-    drawText('03', dx + 8*6, dy + sh*gh + 8*2, tileset, 'sysfont');
-    drawText(zeroPad(player.blocks+1,2), dx + 8*24, dy + sh*gh + 8*2, tileset, 'sysfont');
+
+    let [x,y] = [dx + 8*6, dy + sh*gh + 8*2]
+    ctx.clearRect(x, y, 16,8);
+    drawText('03', x,y, tileset, 'sysfont');
+
+    [x,y] = [dx + 8*24, dy + sh*gh + 8*2];
+    ctx.clearRect(x, y, 16,8);
+    drawText(zeroPad(player.blocks+1,2), x,y, tileset, 'sysfont');
 
   }
 

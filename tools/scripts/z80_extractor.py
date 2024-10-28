@@ -45,22 +45,21 @@ def bits_to_pixels_ext(byte_data, pal, width=16, height=16):
                     bit_value = (byte >> (7 - bit)) & 1
                     c = pal[pofs]
                     fg,bg = getZ80Colors(c)
-                    pixel_value = (*fg,255) if bit_value == 1 else (*bg,255)
+                    alpha = 255 if bit_value==1 else 0
+                    pixel_value = (*fg,alpha) if bit_value == 1 else (*bg,alpha)
                     row.append(pixel_value)
             pofs += 1
         pixel_data.extend(row)
     return pixel_data
 
-def save_png_bits_ext(fname, w, h, pal, data):
+def save_png_bits_ext(fname, w, h, pal, data, trans=0):
     print("%s: %dx%d" % (fname,w,h))
     im = Image.new("RGBA", (w, h))
     data = bits_to_pixels_ext(data, pal, w,h)
     im.putdata(data)
-
-
     im.save(fname)
 
-def extract_sprites(outdir, datafile, ofs=0, limit=0):
+def extract_sprites(outdir, datafile, ofs=0, limit=0, trans=0):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
@@ -82,7 +81,7 @@ def extract_sprites(outdir, datafile, ofs=0, limit=0):
         s = h*8 * w
         zpal = data[ofs+s:ofs+s+w*h]
         #print('palette', zpal)
-        save_png_bits_ext('%s/%03d.png' % (outdir, i), w*8, h*8, zpal, data[ofs:ofs+s])
+        save_png_bits_ext('%s/%03d.png' % (outdir, i), w*8, h*8, zpal, data[ofs:ofs+s], trans=trans)
         ofs += s + w*h
         i += 1
         if i==limit: break
@@ -158,8 +157,8 @@ def extract_font(outdir, datafile, ofs, size=(2,2), limit=128, clip=False, color
 gamedir = os.path.join(indir,'dw')
 datafile = os.path.join(gamedir,'dizzy_wh.trd')
 
-extract_sprites(outdir+'dw/sprites', datafile, 19678, limit=23)
-extract_font(outdir+'dw/font', datafile, 15318, size=(2,2), clip=True, limit=96, trans=3, color=7, shade=2)
-extract_font(outdir+'dw/font2', datafile, 15318, size=(2,2), clip=True, limit=96, trans=3, color=7, shade=3)
+extract_sprites(outdir+'dw/sprites', datafile, 19678, limit=23, trans=0)
+extract_font(outdir+'dw/font', datafile, 15318, size=(2,2), clip=True, limit=96, trans=0, color=7, shade=2)
+extract_font(outdir+'dw/font2', datafile, 15318, size=(2,2), clip=True, limit=96, trans=0, color=7, shade=3)
 extract_font(outdir+'dw/anim', datafile, 15318 + 96*32, size=(2,2), limit=32, color=6)
-extract_font(outdir+'dw/sysfont', os.path.join(gamedir,'48.ROM'), 15616, size=(1,1), limit=96, trans=3, color=7)
+extract_font(outdir+'dw/sysfont', os.path.join(gamedir,'48.ROM'), 15616, size=(1,1), limit=96, trans=0, color=7)
