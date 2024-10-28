@@ -31,7 +31,13 @@ def getZ80Colors(c):
     bg = z80_palette[ ((c >> 3) & 7 ) + bright*8 ]
     return fg, bg
 
-def bits_to_pixels_ext(byte_data, pal, width=16, height=16):
+def getZ80ColorsIndex(c):
+    bright = (c >> 6) & 1;
+    fg = ((c >> 0) & 7 ) + bright*8
+    bg = ((c >> 3) & 7 ) + bright*8
+    return fg, bg
+
+def bits_to_pixels_ext(byte_data, zpal, width=16, height=16):
     pixel_data = []
     byte_index = 0
     for y in range(height):
@@ -43,10 +49,9 @@ def bits_to_pixels_ext(byte_data, pal, width=16, height=16):
             for bit in range(8):
                 if x + bit < width:  # Ensure not to go out of bounds
                     bit_value = (byte >> (7 - bit)) & 1
-                    c = pal[pofs]
-                    fg,bg = getZ80Colors(c)
-                    alpha = 255 if bit_value==1 else 0
-                    pixel_value = (*fg,alpha) if bit_value == 1 else (*bg,alpha)
+                    c = zpal[pofs]
+                    fg,bg = getZ80ColorsIndex(c)
+                    pixel_value = fg if bit_value==1 else bg
                     row.append(pixel_value)
             pofs += 1
         pixel_data.extend(row)
@@ -54,19 +59,18 @@ def bits_to_pixels_ext(byte_data, pal, width=16, height=16):
 
 def save_png_bits_ext(fname, w, h, pal, data, trans=0):
     print("%s: %dx%d" % (fname,w,h))
-    im = Image.new("RGBA", (w, h))
+    im = Image.new("P", (w, h))
     data = bits_to_pixels_ext(data, pal, w,h)
     im.putdata(data)
-    im.save(fname)
+    pal = [c for r in z80_palette for c in r] + [0]*(256-16)*3
+    im.putpalette(pal)
+    im.save(fname, transparency=trans)
 
 def extract_sprites(outdir, datafile, ofs=0, limit=0, trans=0):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
     data = open(datafile,'rb').read()
-
-    pal = [128]*768
-    pal[:3] = [0,0,0]
 
     i = 0
     while ofs<len(data):
@@ -79,8 +83,10 @@ def extract_sprites(outdir, datafile, ofs=0, limit=0, trans=0):
 
         ofs += 2
         s = h*8 * w
+
+        #zpal = [c for r in z80_palette for c in r] + [0]*(256-16)*3
         zpal = data[ofs+s:ofs+s+w*h]
-        #print('palette', zpal)
+
         save_png_bits_ext('%s/%03d.png' % (outdir, i), w*8, h*8, zpal, data[ofs:ofs+s], trans=trans)
         ofs += s + w*h
         i += 1
