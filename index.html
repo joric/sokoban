@@ -19,7 +19,6 @@
 <link rel="stylesheet" href="css/animate.min.css"/>
 
 <style>
-
 * {
   margin: 0;
   padding: 0;
@@ -30,7 +29,6 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #111;
 }
 
 #responsiveImage {
@@ -54,6 +52,11 @@ canvas {
   position: absolute;
   padding: 16px;
   display: flex;
+}
+
+.top-left {
+  left: 0;
+  top: 0;
 }
 
 .bottom-right {
@@ -81,7 +84,6 @@ canvas {
   top: 67px;
   padding-top: 0px;
 }
-
 
 .btn  {
   width: 50px;              /* Button size */
@@ -114,18 +116,25 @@ canvas {
   opacity: 0.5;
 }
 
-</style>
+#backdrop {
+  width: 100%;
+  height: 100%;
+  background-color: #111;
+}
 
-<!--script src="js/YASS_loader.js"></script-->
+</style>
 
 </head>
 <body>
+
+<div id="backdrop">
+</div>
 
 <div id="responsiveImage">
   <canvas id="gameCanvas" width=320 height=200></canvas>
 </div>
 
-<div class="controls">
+<div class="controls top-left">
   <button class="btn btnTileset" id="dw" title="tileset 1">1</button>
   <button class="btn btnTileset" id="lens" title="tileset 2">2</button>
   <button class="btn btnTileset" id="fn" title="tileset 3">3</button>
@@ -827,7 +836,7 @@ function loadLevelInternal(i) {
 
 // see https://animate.style
 
-let effects = [
+let transitions = [
   'bounceIn',
   'flipInX',
   'flipInY',
@@ -853,16 +862,16 @@ let effects = [
   'zoomInDown',
 ];
 
-let enableEffects = true;
-let effectCSS = 'animate__animated animate__fast animate__';
+let enableTransitions = true;
+let transitionClass = 'animate__animated animate__fast animate__';
 
 function loadLevel(i, init) {
-  if (enableEffects && !init) {
+  if (enableTransitions && !init) {
     canvas.addEventListener('animationend', function handleAnimationEnd(event) {
         event.currentTarget.removeEventListener('animationend', handleAnimationEnd);
         loadLevelEnd(i);
     });
-    canvas.className = effectCSS + effects[level % effects.length].replace('In','Out');
+    canvas.className = transitionClass + transitions[level % transitions.length].replace('In','Out');
   } else {
     loadLevelEnd(i, init);
   }
@@ -870,8 +879,8 @@ function loadLevel(i, init) {
 
 function loadLevelEnd(i, init) {
   loadLevelInternal(i);
-  if (enableEffects && !init) {
-    canvas.className = effectCSS + effects[level % effects.length];
+  if (enableTransitions && !init) {
+    canvas.className = transitionClass + transitions[level % transitions.length];
   }
 }
 
@@ -923,6 +932,12 @@ function drawLevel(data) {
       let x = dx + j*sw;
       let y = dy + i*sh;
       let index = 0;
+
+      if (tileset=='dw' && c==T_WALL) {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(x,y,16,16);
+      }
+
 
       if (c==T_DONE) {
         drawSprite(x, y, tileset, 'place', index);
@@ -1308,7 +1323,7 @@ window.onload = function(event) {
     c.onmouseup = c.onmouseout = c.ontouchend = ()=>pressed={};
   });
 }
-/*
+
 function fitCanvas() {
   const container = document.getElementById("responsiveImage");
   const canvas = document.getElementById("gameCanvas");
@@ -1316,48 +1331,25 @@ function fitCanvas() {
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
 
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
+  // Base canvas dimensions
+  const canvasWidth = 320;
+  const canvasHeight = 200;
 
-  // Calculate the best scaling factor to fit the canvas inside the viewport
-  const widthRatio = windowWidth / canvasWidth;
-  const heightRatio = windowHeight / canvasHeight;
-  const scale = Math.min(widthRatio, heightRatio);
+  // Find maximum integer scale that fits the window
+  const scaleX = windowWidth / canvasWidth;
+  const scaleY = windowHeight / canvasHeight;
+  let scale = Math.max(1, Math.min(scaleX, scaleY));
 
-  // Apply the new size to the container
+  // do not clamp to integer before 2x
+  scale = scale < 2 ? scale : ~~scale;
+
   const newWidth = canvasWidth * scale;
   const newHeight = canvasHeight * scale;
 
   container.style.width = `${newWidth}px`;
   container.style.height = `${newHeight}px`;
-}
-*/
-function fitCanvas() {
-    const container = document.getElementById("responsiveImage");
-    const canvas = document.getElementById("gameCanvas");
 
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    // Base canvas dimensions
-    const canvasWidth = 320;
-    const canvasHeight = 200;
-
-    // Find maximum integer scale that fits the window
-    const scaleX = windowWidth / canvasWidth;
-    const scaleY = windowHeight / canvasHeight;
-    let scale = Math.max(1, Math.min(scaleX, scaleY));
-
-    // do not clamp to integer before 2x
-    scale = scale < 2 ? scale : ~~scale;
-
-    const newWidth = canvasWidth * scale;
-    const newHeight = canvasHeight * scale;
-
-    container.style.width = `${newWidth}px`;
-    container.style.height = `${newHeight}px`;
-
-    // TODO: fit canvas to window preserving integer pixel scale
+  // TODO: fit canvas to window preserving integer pixel scale
 }
 
 // Ensure the canvas fits when the page loads and on resize
