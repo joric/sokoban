@@ -1282,7 +1282,7 @@ window.onload = function(event) {
       case 'Digit3': setTileset('fn'); break;
       case 'KeyZ': e.shiftKey ? prevLevel() : undo(); break;
       case 'KeyX': e.shiftKey ? nextLevel() : redo(); break;
-      case 'KeyR': reset(); break;
+      case 'KeyR': history_pos!=0 && reset(); break;
       case 'KeyE': solve(); break;
       case 'Escape': stop(); break;
     }
