@@ -864,13 +864,13 @@ function loadLevel(i, init) {
     });
     canvas.className = effectCSS + effects[level % effects.length].replace('In','Out');
   } else {
-    loadLevelEnd(i);
+    loadLevelEnd(i, init);
   }
 }
 
-function loadLevelEnd(i) {
+function loadLevelEnd(i, init) {
   loadLevelInternal(i);
-  if (enableEffects) {
+  if (enableEffects && !init) {
     canvas.className = effectCSS + effects[level % effects.length];
   }
 }
