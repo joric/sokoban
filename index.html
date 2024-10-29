@@ -824,9 +824,8 @@ function loadLevelInternal(i) {
   initSparkles();
 }
 
-let enableEffects = true;
 
-// see https://animate.style/#documentation
+// see https://animate.style
 
 let effects = [
   'bounceIn',
@@ -854,31 +853,28 @@ let effects = [
   'zoomInDown',
 ];
 
+let enableEffects = true;
 let effectCSS = 'animate__animated animate__fast animate__';
-let newLevel = 0;
 
 function loadLevel(i, init) {
-
   if (enableEffects && !init) {
     canvas.addEventListener('animationend', function handleAnimationEnd(event) {
         event.currentTarget.removeEventListener('animationend', handleAnimationEnd);
         loadLevelEnd(i);
     });
-    effect = level % effects.length;
-    canvas.className = effectCSS + effects[effect].replace('In','Out');
+    canvas.className = effectCSS + effects[level % effects.length].replace('In','Out');
   } else {
     loadLevelEnd(i);
   }
 }
 
-
 function loadLevelEnd(i) {
   loadLevelInternal(i);
   if (enableEffects) {
-    effect = level % effects.length;
-    canvas.className = effectCSS + effects[effect];
+    canvas.className = effectCSS + effects[level % effects.length];
   }
 }
+
 
 // Draw the map using preloaded images
 function drawLevel(data) {
