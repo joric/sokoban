@@ -1254,7 +1254,7 @@ function solve() {
   }
 }
 
-function reset() { loadLevel(level); }
+function reset() { stop(); loadLevelInternal(level); }
 function nextLevel() {level<levels.length-1 && loadLevel(level+1);}
 function prevLevel() {level>0 && loadLevel(level-1);}
 
