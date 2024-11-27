@@ -1365,8 +1365,8 @@ let element = document.body;
 element.addEventListener('click', (e) => {
   const currentTime = new Date().getTime();
   const tapLength = currentTime - lastTap;
-  if (tapLength < 500 && tapLength > 0) {
-    toggleFullscreen();
+  if (tapLength < 250 && tapLength > 0) {
+    if (!document.fullscreenElement) toggleFullscreen();
   }
   lastTap = currentTime;
 });
