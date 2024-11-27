@@ -1120,13 +1120,26 @@ function updateState(selector, enabled) {
   }
 }
 
+let stateTimer = null;
+
 function update(timestep) {
   updateState('#dw', tileset!='dw');
   updateState('#lens', tileset!='lens');
   updateState('#fn', tileset!='fn');
 
   updateState('#reset', history_pos!=0);
-  updateState('#solve', solution.length>0);
+
+  // this has to be delayed or it blinks
+  // updateState('#solve', solution.length>0);
+
+  if (solution.length==0) {
+    stateTimer = setTimeout(function(){updateState('#solve', false)}, 1000);
+  } else {
+    clearTimeout(stateTimer);
+    updateState('#solve', true);
+  }
+
+
   updateState('#undo', history_pos!=0);
   updateState('#redo', history_pos!=history.length-1);
 
