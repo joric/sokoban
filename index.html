@@ -1234,7 +1234,9 @@ function getSolution() {
         let res = output.split('\n\n').pop().replaceAll('\n','');
         //console.log('solution:', res);
         solution = [...res.toLowerCase()];
-        if (autoplay) play();
+        if (autoplay) {
+          setTimeout(play, 1000);
+        }
       } else {
         //console.log('NO SOLUTION');
         //stop();
@@ -1279,6 +1281,7 @@ function applySnapshot(snapshot) {
 }
 
 function redo() {
+  stop();
   if (history.length > history_pos + 1){
     history_pos += 1;
     applySnapshot(history[history_pos]);
@@ -1286,6 +1289,7 @@ function redo() {
 }
 
 function undo() {
+  stop();
   if (history_pos > 0 && history.length > history_pos - 1) {
     history_pos -= 1;
     applySnapshot(history[history_pos]);
