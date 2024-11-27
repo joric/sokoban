@@ -1375,9 +1375,7 @@ window.addEventListener('orientationchange', fitCanvas); // For mobile device or
 
 let lastTap = 0;
 
-let element = document.body;
-
-element.addEventListener('click', (e) => {
+canvas.addEventListener('click', (e) => {
   const currentTime = new Date().getTime();
   const tapLength = currentTime - lastTap;
   if (tapLength < 250 && tapLength > 0) {
@@ -1396,7 +1394,7 @@ function toggleFullscreen() {
   if (document.fullscreenElement) {
     document.exitFullscreen();
   } else {
-    element.requestFullscreen().catch(err => console.error(err));
+    document.body.requestFullscreen().catch(err => console.error(err));
   }
 }
 
