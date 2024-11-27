@@ -1196,13 +1196,16 @@ function play() {
 }
 
 function stop() {
+  clearTimeout(autoplayTimer);
   playing = false;
   autoplay = false;
 }
 
 let worker = null;
+let autoplayTimer = null;
 
 function getSolution() {
+  clearTimeout(autoplayTimer);
   solution = [];
 
   let args = [];
@@ -1235,7 +1238,7 @@ function getSolution() {
         //console.log('solution:', res);
         solution = [...res.toLowerCase()];
         if (autoplay) {
-          setTimeout(play, 1000);
+          autoplayTimer = setTimeout(function(){ play(); }, 1000);
         }
       } else {
         //console.log('NO SOLUTION');
@@ -1257,8 +1260,8 @@ function solve() {
 }
 
 function reset() { stop(); loadLevelInternal(level); }
-function nextLevel() {level<levels.length-1 && loadLevel(level+1);}
-function prevLevel() {level>0 && loadLevel(level-1);}
+function nextLevel() {level<levels.length-1 && loadLevelInternal(level+1); }
+function prevLevel() {level>0 && loadLevelInternal(level-1); }
 
 function takeSnapshot() {
   // just serialize player data for now, no complicated stuff
