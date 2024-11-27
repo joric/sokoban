@@ -800,7 +800,7 @@ Player.prototype.move = function(dx, dy, auto=false) {
 
 function loadLevelInternal(i) {
   level = i;
-  stop();
+  playing = false;
   let src = levels[level];
   let data = [];
   let [x,y] = [0,0];
@@ -1136,7 +1136,7 @@ function update(timestep) {
   //updateState('#down', player.canMove(0,1));
 
   // this has to be delayed or it blinks
-  // updateState('#solve', solution.length>0);
+  //updateState('#solve', solution.length>0);
 
   let solutionFound = solution.length>0;
   if (solutionState != solutionFound) {
@@ -1148,7 +1148,6 @@ function update(timestep) {
     }
   }
   solutionState = solutionFound;
-
 
   let time = Date.now();
   let dt = time - startTime;
@@ -1166,13 +1165,16 @@ function update(timestep) {
 
 let solution = [];
 let playing = false;
+let autoplay = false;
 
 function play() {
-  if (solution.length==0 || !playing) {
-    stop();
+  if (solution.length==0 || (!playing && !autoplay)) {
+    playing = false;
     player.move(0,0);
     return;
   }
+
+  autoplay = true;
 
   player.delay = 50;
 
@@ -1195,6 +1197,7 @@ function play() {
 
 function stop() {
   playing = false;
+  autoplay = false;
 }
 
 let worker = null;
@@ -1231,6 +1234,7 @@ function getSolution() {
         let res = output.split('\n\n').pop().replaceAll('\n','');
         //console.log('solution:', res);
         solution = [...res.toLowerCase()];
+        if (autoplay) play();
       } else {
         //console.log('NO SOLUTION');
         //stop();
