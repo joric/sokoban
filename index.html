@@ -1133,7 +1133,9 @@ function update(timestep) {
   // updateState('#solve', solution.length>0);
 
   if (solution.length==0) {
-    stateTimer = setTimeout(function(){updateState('#solve', false)}, 1000);
+    if (stateTimer != null) {
+      stateTimer = setTimeout(function(){updateState('#solve', false)}, 1000);
+    }
   } else {
     clearTimeout(stateTimer);
     updateState('#solve', true);
