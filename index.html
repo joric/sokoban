@@ -1349,6 +1349,10 @@ window.onload = function(event) {
     c.onmousedown = c.ontouchstart = e=>{ e.preventDefault(); pressed['Arrow'+capitalize(e.target.id)] = true; };
     c.onmouseup = c.onmouseout = c.ontouchend = ()=>pressed={};
   });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
 }
 
 function fitCanvas() {
